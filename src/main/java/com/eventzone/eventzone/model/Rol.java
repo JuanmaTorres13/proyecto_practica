@@ -14,8 +14,6 @@ public class Rol {
     @Column(unique = true)
     private String nombre;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<Usuario> usuarios;
 
     // Getters y setters
     public Long getId() {
@@ -32,14 +30,6 @@ public class Rol {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public Set<Usuario> getUsuarios() {
-        return usuarios;
-    }
-
-    public void setUsuarios(Set<Usuario> usuarios) {
-        this.usuarios = usuarios;
     }
 
 }

@@ -31,3 +31,48 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de compilación de Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Directorios de build de Maven/Gradle
+/target/
+/build/
+
+# Archivos de logs
+/logs/
+
+# Configuración de IDE
+/.idea/
+/*.iml
+/.classpath
+/.project
+/.settings/
+/.vscode/
+
+# Archivos de Spring Boot
+spring-boot-app.log
+*.pid
+
+# Archivos de dependencias de Maven/Gradle
+/.mvn/wrapper/maven-wrapper.jar
+.gradle/
+/**/gradle-wrapper.jar
+!gradle-wrapper.jar
+
+# Archivos temporales
+*.tmp
+*.swp
+*.swo
+
+# Configuración local de usuarios
+.env
+local.properties
+
