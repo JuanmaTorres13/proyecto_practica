@@ -4,10 +4,12 @@ import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -20,15 +22,25 @@ public class JwtUtil {
     // 10 horas
     private final long jwtExpirationMs = 36000000;
 
-    public String generateToken(String username) {
+    /**
+     * Genera un token JWT con el username y roles del usuario.
+     */
+    public String generateToken(String username, Collection<? extends GrantedAuthority> authorities) {
         logger.debug("🪙 Generando token JWT para usuario: {}", username);
 
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
+
         String token = Jwts.builder()
+                .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+                .compact()
+                .trim();
 
         logger.info("✅ Token JWT generado correctamente para usuario: {}", username);
         return token;
@@ -65,11 +77,27 @@ public class JwtUtil {
         }
     }
 
+    public List<String> getRolesFromToken(String token) {
+        try {
+            Claims claims = getAllClaimsFromToken(token);
+            List<String> roles = claims.get("roles", List.class);
+            logger.debug("🎭 Roles extraídos del token: {}", roles);
+            return roles != null ? roles : Collections.emptyList();
+        } catch (Exception e) {
+            logger.error("💥 Error al obtener roles del token: {}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = Jwts.parser()
+        final Claims claims = getAllClaimsFromToken(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims getAllClaimsFromToken(String token) {
+        return Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)
                 .getBody();
-        return claimsResolver.apply(claims);
     }
 }

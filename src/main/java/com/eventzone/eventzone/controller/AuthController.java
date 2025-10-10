@@ -44,7 +44,11 @@ public class AuthController {
 
         UserDetails userDetails = usuarioDetailsService.loadUserByUsername(loginRequest.getEmail());
 
-        String token = jwtUtil.generateToken(userDetails.getUsername());
+        // 🔐 Generamos token con roles incluidos
+        String token = jwtUtil.generateToken(
+                userDetails.getUsername(),
+                userDetails.getAuthorities()
+        );
 
         return new LoginResponse(token);
     }

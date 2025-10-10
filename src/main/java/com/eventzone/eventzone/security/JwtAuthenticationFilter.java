@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -16,17 +16,19 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private UsuarioDetailsService usuarioDetailsService;
+    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -35,34 +37,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
-        logger.debug("➡️  [JwtFilter] Petición entrante: {}", path);
+        logger.debug("➡️ [JwtFilter] Petición entrante: {}", path);
 
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (jwt == null) {
-                logger.debug("⚠️  No se encontró token JWT en la cabecera Authorization.");
+            if (!StringUtils.hasText(jwt)) {
+                logger.debug("⚠️ No se encontró token JWT en la cabecera Authorization.");
             } else {
                 logger.debug("🔐 Token recibido: {}", jwt.substring(0, Math.min(jwt.length(), 20)) + "...");
 
                 if (jwtUtil.validateToken(jwt)) {
                     String email = jwtUtil.getUsernameFromToken(jwt);
-                    logger.info("✅ Token válido para usuario: {}", email);
+                    List<String> roles = jwtUtil.getRolesFromToken(jwt);
 
-                    var userDetails = usuarioDetailsService.loadUserByUsername(email);
-                    logger.debug("🧍 Usuario cargado: {}", userDetails.getUsername());
-                    logger.debug("🎭 Roles del usuario: {}", userDetails.getAuthorities());
+                    logger.info("✅ Token válido para usuario: {}", email);
+                    logger.debug("🎭 Roles extraídos del token: {}", roles);
+
+                    var authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
 
                     var authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails,
+                            email,
                             null,
-                            userDetails.getAuthorities()
+                            authorities
                     );
+
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    logger.info("🔓 Usuario autenticado correctamente en el contexto de seguridad: {}", email);
 
+                    logger.info("🔓 Usuario autenticado correctamente: {}", email);
                 } else {
                     logger.warn("❌ Token JWT inválido o expirado.");
                 }
