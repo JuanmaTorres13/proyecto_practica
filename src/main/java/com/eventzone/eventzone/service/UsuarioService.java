@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 
 @Service
 public class UsuarioService {
@@ -39,7 +38,7 @@ public class UsuarioService {
         nuevoUsuario.setEmail(request.getEmail());
         nuevoUsuario.setPassword(passwordEncoder.encode(request.getPassword()));
         nuevoUsuario.setFechaRegistro(LocalDateTime.now());
-        nuevoUsuario.setRoles(Collections.singleton(rolUsuario));
+        nuevoUsuario.setRol(rolUsuario); 
 
         return usuarioRepository.save(nuevoUsuario);
     }
@@ -48,5 +47,4 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
-
 }

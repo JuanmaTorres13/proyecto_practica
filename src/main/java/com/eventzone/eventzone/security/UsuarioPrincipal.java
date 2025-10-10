@@ -1,19 +1,18 @@
 package com.eventzone.eventzone.security;
 
-import com.eventzone.eventzone.model.Rol;
 import com.eventzone.eventzone.model.Usuario;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class UsuarioPrincipal implements UserDetails {
 
-    private String email;
-    private String password;
-    private Collection<? extends GrantedAuthority> authorities;
+    private final String email;
+    private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     public UsuarioPrincipal(String email, String password, Collection<? extends GrantedAuthority> authorities) {
         this.email = email;
@@ -22,17 +21,14 @@ public class UsuarioPrincipal implements UserDetails {
     }
 
     public static UsuarioPrincipal build(Usuario usuario) {
-    	var authorities = usuario.getRoles().stream()
-    	        .map(Rol::getNombre)
-    	        .map(nombre -> nombre.startsWith("ROLE_") ? nombre : "ROLE_" + nombre)
-    	        .map(SimpleGrantedAuthority::new)
-    	        .collect(Collectors.toList());
+        String rolNombre = usuario.getRol().getNombre().toUpperCase();
 
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(rolNombre);
 
         return new UsuarioPrincipal(
                 usuario.getEmail(),
                 usuario.getPassword(),
-                authorities
+                List.of(authority)
         );
     }
 

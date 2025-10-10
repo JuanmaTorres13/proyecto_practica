@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.Optional;
 
 @Configuration
@@ -26,19 +25,19 @@ public class DataInitializer {
 
             // Crear rol ADMIN si no existe
             Rol rolAdmin = rolRepo.findByNombre("ADMIN")
-                .orElseGet(() -> {
-                    Rol nuevoRol = new Rol();
-                    nuevoRol.setNombre("ADMIN");
-                    return rolRepo.save(nuevoRol);
-                });
+                    .orElseGet(() -> {
+                        Rol nuevoRol = new Rol();
+                        nuevoRol.setNombre("ADMIN");
+                        return rolRepo.save(nuevoRol);
+                    });
 
             // Crear rol USER si no existe
             Rol rolUser = rolRepo.findByNombre("USER")
-                .orElseGet(() -> {
-                    Rol nuevoRol = new Rol();
-                    nuevoRol.setNombre("USER");
-                    return rolRepo.save(nuevoRol);
-                });
+                    .orElseGet(() -> {
+                        Rol nuevoRol = new Rol();
+                        nuevoRol.setNombre("USER");
+                        return rolRepo.save(nuevoRol);
+                    });
 
             // Verificar si usuario admin ya existe
             Optional<Usuario> adminExistente = usuarioRepo.findByEmail("admin@eventzone.com");
@@ -48,7 +47,7 @@ public class DataInitializer {
                 admin.setEmail("admin@eventzone.com");
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setFechaRegistro(LocalDateTime.now());
-                admin.setRoles(Collections.singleton(rolAdmin));
+                admin.setRol(rolAdmin); // ⚠ Ahora es campo único
 
                 usuarioRepo.save(admin);
                 System.out.println("Usuario administrador creado con email admin@eventzone.com y password admin123");

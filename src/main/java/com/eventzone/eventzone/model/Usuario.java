@@ -1,9 +1,11 @@
 package com.eventzone.eventzone.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.Set;
+import lombok.ToString;
 
+import java.time.LocalDateTime;
+
+@ToString
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
@@ -22,16 +24,11 @@ public class Usuario {
 
     private LocalDateTime fechaRegistro;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "usuario_roles",
-        joinColumns = @JoinColumn(name = "usuario_id"),
-        inverseJoinColumns = @JoinColumn(name = "rol_id")
-    )
-    private Set<Rol> roles;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol_id", nullable = false)
+    private Rol rol;
 
-    // Getters y setters
-    
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -72,11 +69,11 @@ public class Usuario {
         this.fechaRegistro = fechaRegistro;
     }
 
-    public Set<Rol> getRoles() {
-        return roles;
+    public Rol getRol() {
+        return rol;
     }
 
-    public void setRoles(Set<Rol> roles) {
-        this.roles = roles;
+    public void setRol(Rol rol) {
+        this.rol = rol;
     }
 }
