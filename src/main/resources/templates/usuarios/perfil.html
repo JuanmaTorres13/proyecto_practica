@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil - EventZone</title>
+</head>
+<body>
+    <h1>Mi perfil</h1>
+
+    <div id="infoUsuario"></div>
+
+    <button id="logoutBtn">Cerrar sesión</button>
+
+    <script>
+        async function cargarUsuario() {
+            const token = sessionStorage.getItem("token");
+            if (!token) {
+                window.location.href = "/usuarios/login";
+                return;
+            }
+
+            const res = await fetch("/usuarios/me", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById("infoUsuario").innerHTML = `
+                    <p><strong>Nombre:</strong> ${data.nombre}</p>
+                    <p><strong>Email:</strong> ${data.email}</p>
+                    <p><strong>Rol:</strong> ${data.rol}</p>`;
+            } else {
+                window.location.href = "/usuarios/login";
+            }
+        }
+
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            sessionStorage.removeItem("token");
+            window.location.href = "/usuarios/login";
+        });
+
+        cargarUsuario();
+    </script>
+</body>
+</html>
