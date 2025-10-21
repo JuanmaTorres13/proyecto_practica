@@ -37,7 +37,14 @@ public class SecurityConfig {
 
                 // Configuramos autorizaciones según autoridad (sin ROLE_)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/usuarios/registro").permitAll()
+                        .requestMatchers(
+                        		"/auth/**", 
+                        		"/usuarios/registro",
+                        		"/css/**",
+                        		"/js/**",
+                        		"/images/**",
+                        		"/usuarios/**"
+                        		).permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/user/**").hasAuthority("USER")
                         .anyRequest().authenticated()
