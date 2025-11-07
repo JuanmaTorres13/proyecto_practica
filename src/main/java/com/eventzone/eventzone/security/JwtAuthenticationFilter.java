@@ -2,6 +2,7 @@ package com.eventzone.eventzone.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -97,6 +98,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith("/auth/")
                 || path.startsWith("/usuarios/login")
                 || path.startsWith("/usuarios/registro")
+                || path.startsWith("/usuarios/verificar")
                 || path.startsWith("/js/")
                 || path.startsWith("/css/")
                 || path.startsWith("/images/")
@@ -104,13 +106,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Extrae el token JWT de la cabecera Authorization
+     * Extrae el token JWT 
      */
     private String getJwtFromRequest(HttpServletRequest request) {
+        // Primero, intentar obtener el token desde la cookie
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        // En caso de que no exista cookie, seguir buscando en el header Authorization (opcional)
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+
         return null;
     }
+
 }
