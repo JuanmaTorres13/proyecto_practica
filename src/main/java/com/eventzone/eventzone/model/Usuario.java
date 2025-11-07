@@ -3,6 +3,8 @@ package com.eventzone.eventzone.model;
 import jakarta.persistence.*;
 import lombok.ToString;
 
+import java.util.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @ToString
@@ -27,6 +29,14 @@ public class Usuario {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", nullable = false)
     private Rol rol;
+    
+    private String telefono;
+    private String ciudad;
+    private String bio;
+
+    @Column(name = "fecha_nacimiento")
+    private Date fechaNacimiento;
+
 
     // Getters y Setters
     public Long getId() {
@@ -76,4 +86,17 @@ public class Usuario {
     public void setRol(Rol rol) {
         this.rol = rol;
     }
+    
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+
+    public String getCiudad() { return ciudad; }
+    public void setCiudad(String ciudad) { this.ciudad = ciudad; }
+
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
+
+    public Date getFechaNacimiento() { return fechaNacimiento; }
+    public void setFechaNacimiento(Date fechaNacimiento) { this.fechaNacimiento = fechaNacimiento; }
+
 }
