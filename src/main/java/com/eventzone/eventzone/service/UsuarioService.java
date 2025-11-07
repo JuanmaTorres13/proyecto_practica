@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -47,4 +48,22 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
+    
+    // Verifica si existe un usuario por su email
+    public boolean existePorEmail(String email) {
+        return usuarioRepository.findByEmail(email).isPresent();
+    }
+
+    // Verifica si email y contraseña coinciden
+    public boolean verificarCredenciales(String email, String password) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+
+        if (usuarioOpt.isEmpty()) {
+            return false; // No existe el usuario
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        return passwordEncoder.matches(password, usuario.getPassword());
+    }
+
 }

@@ -37,21 +37,27 @@ public class SecurityConfig {
 
                 // Configuramos autorizaciones según autoridad (sin ROLE_)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                        		"/auth/**", 
-                        		"/usuarios/registro",
-                        		"/css/**",
-                        		"/js/**",
-                        		"/images/**",
-                        		"/usuarios/**"
-                        		).permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/user/**").hasAuthority("USER")
-                        .anyRequest().authenticated()
+                		.requestMatchers(
+                			    "/auth/**", 
+                			    "/usuarios/registro",
+                			    "/usuarios/login",
+                			    "/usuarios/verificar",
+                			    "/css/**",
+                			    "/js/**",
+                			    "/images/**",
+                			    "/favicon.ico"
+                			).permitAll()
+                			.requestMatchers("/usuarios/profile").authenticated()
+                			.requestMatchers("/admin/**").hasAuthority("ADMIN")
+                			.requestMatchers("/user/**").hasAuthority("USER")
+                			.anyRequest().authenticated()
+
                 )
 
                 // Agregamos nuestro filtro JWT antes del UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin(form -> form.disable())
+                .logout(logout -> logout.disable())
 
                 .build();
     }

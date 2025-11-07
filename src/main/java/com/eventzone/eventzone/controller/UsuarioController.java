@@ -10,6 +10,11 @@ import com.eventzone.eventzone.security.JwtUtil;
 import com.eventzone.eventzone.security.UsuarioDetailsService;
 import com.eventzone.eventzone.service.UsuarioService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +52,9 @@ public class UsuarioController {
         return "usuarios/login";
     }
 
-    @GetMapping("/perfil")
+    @GetMapping("/profile")
     public String mostrarPerfil() {
-        return "usuarios/perfil";
+        return "usuarios/profile";
     }
 
     // --- REGISTRO ---
@@ -69,26 +74,77 @@ public class UsuarioController {
     // --- LOGIN ---
     @PostMapping("/login")
     @ResponseBody
-    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest,
+                                   HttpServletResponse response) {
         logger.info("Intentando login para usuario: {}", loginRequest.getEmail());
 
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail(),
-                loginRequest.getPassword()
-            )
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                )
         );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserDetails userDetails = usuarioDetailsService.loadUserByUsername(loginRequest.getEmail());
+        String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities());
 
-        String token = jwtUtil.generateToken(
-                userDetails.getUsername(),
-                userDetails.getAuthorities()
+        // Crear cookie JWT
+        Cookie cookie = new Cookie("jwt_token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // cambia a true si usas HTTPS
+        cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60);
+        response.addCookie(cookie);
+
+        logger.info("Login exitoso, cookie JWT creada para usuario: {}", loginRequest.getEmail());
+
+        try {
+            response.sendRedirect("/usuarios/profile");
+            return null;
+        } catch (IOException e) {
+            logger.error("Error al redirigir después del login", e);
+            return ResponseEntity.internalServerError().body("Error en la redirección");
+        }
+    }
+
+    
+    
+    // --- LOGOUT ---
+    @GetMapping("/logout")
+    public void logout(HttpServletResponse response) throws IOException {
+        Cookie cookie = new Cookie("jwt_token", "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // elimina la cookie
+        response.addCookie(cookie);
+        response.sendRedirect("/usuarios/login");
+    }
+
+
+    
+    @PostMapping("/verificar")
+    public void verificarUsuario(LoginRequest loginRequest, HttpServletResponse response) throws IOException {
+        if (!usuarioService.existePorEmail(loginRequest.getEmail())) {
+            response.sendRedirect("/usuarios/login?error=usuario_no_existe");
+            return;
+        }
+
+        boolean correcto = usuarioService.verificarCredenciales(
+            loginRequest.getEmail(), loginRequest.getPassword()
         );
 
-        logger.info("Login exitoso para usuario: {}. Token generado.", loginRequest.getEmail());
-        return new LoginResponse(token);
+        if (!correcto) {
+            response.sendRedirect("/usuarios/login?error=contraseña_incorrecta");
+            return;
+        }
+
+        // ✅ Si todo va bien, redirigir al perfil
+        response.sendRedirect("/usuarios/profile");
     }
+
+
 
     // --- PERFIL ---
     @GetMapping("/me")
