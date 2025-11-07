@@ -20,10 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -116,40 +118,42 @@ public class UsuarioController {
      */
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest,
-                                   HttpServletResponse response) {
-        logger.info("Intentando login para usuario: {}", loginRequest.getEmail());
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        UserDetails userDetails = usuarioDetailsService.loadUserByUsername(loginRequest.getEmail());
-        String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities());
-
-        // 🔐 Crear cookie con el token JWT
-        Cookie cookie = new Cookie("jwt_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false); // cambia a true en producción (HTTPS)
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60);
-        response.addCookie(cookie);
-
-        logger.info("Login exitoso, cookie JWT creada para usuario: {}", loginRequest.getEmail());
-
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            response.sendRedirect("/usuarios/profile");
-            return null;
-        } catch (IOException e) {
-            logger.error("Error al redirigir después del login", e);
-            return ResponseEntity.internalServerError().body("Error en la redirección");
+            // 1️. Verificar si el usuario existe
+            if (!usuarioService.existePorEmail(loginRequest.getEmail())) {
+                return ResponseEntity.status(404).body("Usuario no encontrado");
+            }
+
+            // 2️. Autenticar
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    loginRequest.getEmail(),
+                    loginRequest.getPassword()
+                )
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            UserDetails userDetails = usuarioDetailsService.loadUserByUsername(loginRequest.getEmail());
+            String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities());
+
+            Cookie cookie = new Cookie("jwt_token", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(false); // HTTPS en producción
+            cookie.setPath("/");
+            cookie.setMaxAge(24 * 60 * 60);
+
+            // Añadir cookie a la respuesta
+            return ResponseEntity.ok("Login exitoso"); 
+
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body("Contraseña incorrecta");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al iniciar sesión");
         }
     }
+
 
     // ==================== LOGOUT ====================
 
