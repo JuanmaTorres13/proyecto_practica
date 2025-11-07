@@ -39,7 +39,7 @@ public class UsuarioResponse {
     private String bio;
 
     /** Fecha de nacimiento del usuario */
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento;
 
     /**
      * Constructor completo para inicializar un objeto {@link UsuarioResponse}.
@@ -52,7 +52,7 @@ public class UsuarioResponse {
      * @param bio             breve descripción o biografía del usuario.
      * @param fechaNacimiento fecha de nacimiento del usuario.
      */
-    public UsuarioResponse(String nombre, String email, String rol, String telefono, String ciudad, String bio, Date fechaNacimiento) {
+    public UsuarioResponse(String nombre, String email, String rol, String telefono, String ciudad, String bio, LocalDate fechaNacimiento) {
         this.nombre = nombre;
         this.email = email;
         this.rol = rol;
@@ -93,7 +93,7 @@ public class UsuarioResponse {
     }
 
     /** @return la fecha de nacimiento del usuario. */
-    public Date getFechaNacimiento() {
+    public LocalDate getFechaNacimiento() {
         return fechaNacimiento;
     }
 }

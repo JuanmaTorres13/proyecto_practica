@@ -62,7 +62,7 @@ async function cargarPerfil() {
         ciudadInput.value = data.ciudad || '';
         bioTextarea.value = data.bio || '';
         fechaNacimientoInput.value = data.fechaNacimiento || '';
-
+		
         // Sidebar
         document.getElementById('userName').textContent = data.nombre;
         document.getElementById('userEmail').textContent = data.email;

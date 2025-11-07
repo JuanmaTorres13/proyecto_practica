@@ -35,7 +35,7 @@ public class Usuario {
     private String bio;
 
     @Column(name = "fecha_nacimiento")
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento;
 
 
     // Getters y Setters
@@ -96,7 +96,7 @@ public class Usuario {
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
 
-    public Date getFechaNacimiento() { return fechaNacimiento; }
-    public void setFechaNacimiento(Date fechaNacimiento) { this.fechaNacimiento = fechaNacimiento; }
+    public LocalDate getFechaNacimiento() { return fechaNacimiento; }
+    public void setFechaNacimiento(LocalDate fechaNacimiento) { this.fechaNacimiento = fechaNacimiento; }
 
 }
