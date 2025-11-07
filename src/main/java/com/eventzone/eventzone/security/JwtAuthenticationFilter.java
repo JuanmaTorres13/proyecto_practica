@@ -19,16 +19,47 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Filtro de autenticación JWT que intercepta todas las solicitudes HTTP
+ * y valida la presencia y validez del token JWT.
+ * <p>
+ * Si el token es válido, se establece la autenticación del usuario en el
+ * contexto de seguridad de Spring Security. En caso contrario, devuelve
+ * un error 401 (Unauthorized).
+ * </p>
+ *
+ * <p>Extiende {@link OncePerRequestFilter}, lo que garantiza que el filtro
+ * se ejecute una sola vez por cada solicitud.</p>
+ *
+ * @author 
+ * @version 1.0
+ * @since 2025
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtUtil jwtUtil;
 
+    /**
+     * Constructor que inyecta la utilidad JWT.
+     *
+     * @param jwtUtil clase auxiliar para generar y validar tokens JWT.
+     */
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * Método principal del filtro. Se ejecuta en cada solicitud HTTP
+     * para comprobar si el token JWT está presente y es válido.
+     *
+     * @param request     la solicitud HTTP entrante.
+     * @param response    la respuesta HTTP que se enviará.
+     * @param filterChain la cadena de filtros para continuar la ejecución.
+     * @throws ServletException si ocurre un error en el procesamiento del filtro.
+     * @throws IOException      si ocurre un error de entrada/salida.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -37,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Ignorar rutas públicas y recursos estáticos
+        // Ignora rutas públicas y recursos estáticos
         if (isPublicPath(path)) {
             filterChain.doFilter(request, response);
             return;
@@ -92,7 +123,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Detecta rutas públicas o recursos estáticos que no requieren JWT.
+     * Verifica si la ruta solicitada corresponde a un recurso público o estático
+     * que no requiere autenticación.
+     *
+     * @param path la ruta de la solicitud HTTP.
+     * @return {@code true} si la ruta es pública, {@code false} si requiere autenticación.
      */
     private boolean isPublicPath(String path) {
         return path.startsWith("/auth/")
@@ -106,10 +141,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Extrae el token JWT 
+     * Extrae el token JWT desde la cookie "jwt_token" o, si no está presente,
+     * desde el encabezado HTTP "Authorization" (formato Bearer).
+     *
+     * @param request la solicitud HTTP entrante.
+     * @return el token JWT si está presente, o {@code null} si no se encuentra.
      */
     private String getJwtFromRequest(HttpServletRequest request) {
-        // Primero, intentar obtener el token desde la cookie
+        // Intentar obtener el token desde la cookie
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("jwt_token".equals(cookie.getName())) {
@@ -118,7 +157,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // En caso de que no exista cookie, seguir buscando en el header Authorization (opcional)
+        // Si no existe cookie, buscar en el header Authorization (opcional)
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
@@ -126,5 +165,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         return null;
     }
-
 }

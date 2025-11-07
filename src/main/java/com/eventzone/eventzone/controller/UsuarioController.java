@@ -17,7 +17,6 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +27,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controlador principal que gestiona todas las operaciones relacionadas con los usuarios.
+ * <p>
+ * Se encarga de manejar el registro, login, logout, verificación de credenciales
+ * y gestión del perfil del usuario autenticado.
+ * </p>
+ *
+ * <p>Los tokens JWT se generan en el login y se guardan en cookies seguras
+ * para la autenticación en las rutas protegidas.</p>
+ *
+ * @author  
+ * @version 1.0
+ * @since 2025
+ */
 @Controller
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -46,18 +59,36 @@ public class UsuarioController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // --- VISTAS ---
+    // ==================== VISTAS ====================
+
+    /**
+     * Muestra la vista del formulario de login.
+     *
+     * @return nombre de la plantilla Thymeleaf correspondiente.
+     */
     @GetMapping("/login")
     public String mostrarLogin() {
         return "usuarios/login";
     }
 
+    /**
+     * Muestra la vista del perfil del usuario.
+     *
+     * @return nombre de la plantilla Thymeleaf correspondiente.
+     */
     @GetMapping("/profile")
     public String mostrarPerfil() {
         return "usuarios/profile";
     }
 
-    // --- REGISTRO ---
+    // ==================== REGISTRO ====================
+
+    /**
+     * Registra un nuevo usuario en la base de datos.
+     *
+     * @param request DTO con los datos del registro del usuario.
+     * @return respuesta HTTP indicando éxito o error.
+     */
     @PostMapping("/registro")
     @ResponseBody
     public ResponseEntity<?> registrarUsuario(@RequestBody RegistroRequest request) {
@@ -71,7 +102,18 @@ public class UsuarioController {
         }
     }
 
-    // --- LOGIN ---
+    // ==================== LOGIN ====================
+
+    /**
+     * Autentica un usuario, genera un token JWT y lo guarda en una cookie.
+     * <p>
+     * Si las credenciales son correctas, redirige al perfil del usuario.
+     * </p>
+     *
+     * @param loginRequest objeto con email y contraseña.
+     * @param response     respuesta HTTP donde se agregará la cookie JWT.
+     * @return una redirección al perfil o un error en caso de fallo.
+     */
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest,
@@ -90,10 +132,10 @@ public class UsuarioController {
         UserDetails userDetails = usuarioDetailsService.loadUserByUsername(loginRequest.getEmail());
         String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities());
 
-        // Crear cookie JWT
+        // 🔐 Crear cookie con el token JWT
         Cookie cookie = new Cookie("jwt_token", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // cambia a true si usas HTTPS
+        cookie.setSecure(false); // cambia a true en producción (HTTPS)
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60);
         response.addCookie(cookie);
@@ -109,9 +151,14 @@ public class UsuarioController {
         }
     }
 
-    
-    
-    // --- LOGOUT ---
+    // ==================== LOGOUT ====================
+
+    /**
+     * Cierra la sesión del usuario eliminando la cookie JWT.
+     *
+     * @param response objeto de respuesta HTTP.
+     * @throws IOException si ocurre un error al redirigir.
+     */
     @GetMapping("/logout")
     public void logout(HttpServletResponse response) throws IOException {
         Cookie cookie = new Cookie("jwt_token", "");
@@ -122,8 +169,19 @@ public class UsuarioController {
         response.sendRedirect("/usuarios/login");
     }
 
+    // ==================== VERIFICACIÓN ====================
 
-    
+    /**
+     * Verifica si un usuario existe y si sus credenciales son correctas.
+     * <p>
+     * Si es correcto, redirige al perfil del usuario, de lo contrario,
+     * redirige al login con un mensaje de error.
+     * </p>
+     *
+     * @param loginRequest credenciales del usuario.
+     * @param response     objeto HTTP para redirección.
+     * @throws IOException si ocurre un error durante la redirección.
+     */
     @PostMapping("/verificar")
     public void verificarUsuario(LoginRequest loginRequest, HttpServletResponse response) throws IOException {
         if (!usuarioService.existePorEmail(loginRequest.getEmail())) {
@@ -140,13 +198,16 @@ public class UsuarioController {
             return;
         }
 
-        // ✅ Si todo va bien, redirigir al perfil
         response.sendRedirect("/usuarios/profile");
     }
 
+    // ==================== PERFIL ====================
 
-
-    // --- PERFIL ---
+    /**
+     * Obtiene la información del usuario autenticado usando el token JWT.
+     *
+     * @return {@link UsuarioResponse} con los datos del usuario autenticado.
+     */
     @GetMapping("/me")
     @ResponseBody
     public ResponseEntity<?> obtenerUsuarioAutenticado() {
@@ -163,9 +224,44 @@ public class UsuarioController {
         UsuarioResponse response = new UsuarioResponse(
             usuario.getNombre(),
             usuario.getEmail(),
-            usuario.getRol().getNombre()
+            usuario.getRol().getNombre(),
+            usuario.getTelefono(),
+            usuario.getCiudad(),
+            usuario.getBio(),
+            usuario.getFechaNacimiento()
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Actualiza los datos del perfil del usuario autenticado en la base de datos.
+     *
+     * @param usuarioResponse objeto con los nuevos datos del usuario.
+     * @return mensaje de confirmación o error.
+     */
+    @PutMapping("/me")
+    @ResponseBody
+    public ResponseEntity<?> actualizarPerfil(@RequestBody UsuarioResponse usuarioResponse) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() 
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(401).body("Usuario no autenticado");
+        }
+
+        String email = (String) authentication.getPrincipal();
+        Usuario usuario = usuarioService.buscarPorEmail(email);
+
+        usuario.setNombre(usuarioResponse.getNombre());
+        usuario.setEmail(usuarioResponse.getEmail());
+        usuario.setTelefono(usuarioResponse.getTelefono());
+        usuario.setCiudad(usuarioResponse.getCiudad());
+        usuario.setBio(usuarioResponse.getBio());
+        usuario.setFechaNacimiento(usuarioResponse.getFechaNacimiento());
+
+        usuarioService.guardar(usuario);
+
+        return ResponseEntity.ok("Perfil actualizado correctamente");
     }
 }
