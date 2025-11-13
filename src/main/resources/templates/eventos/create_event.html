@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Evento - EventZone</title>
+    <link rel="stylesheet" th:href="@{/css/create-event.css}" />
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">📅</div>
+                    <h1>EventZone</h1>
+                </div>
+                
+                <nav class="header-nav">
+                    <a href="#" class="nav-link">Eventos</a>
+                    <a href="#" class="nav-link">Mi Perfil</a>
+                    <button class="logout-btn">
+                        <span>🚪</span>
+                        Cerrar sesión
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container main-container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Crear Nuevo Evento</h1>
+                <p class="page-subtitle">Completa los detalles para publicar tu evento</p>
+            </div>
+            <button class="btn-preview" id="previewBtn">
+                <span>👁️</span>
+                Vista Previa
+            </button>
+        </div>
+
+        <div class="create-layout">
+            <div class="form-section">
+                <form id="eventForm">
+                    <!-- Tipo de Evento -->
+                    <div class="card">
+                        <h2 class="card-title">
+                            <span class="title-icon">🎭</span>
+                            Tipo de Evento
+                        </h2>
+                        <div class="event-type-grid">
+                            <label class="event-type-card">
+                                <input type="radio" name="eventType" value="cine" required>
+                                <div class="type-content">
+                                    <span class="type-icon">🎬</span>
+                                    <span class="type-name">Cine</span>
+                                </div>
+                            </label>
+                            <label class="event-type-card">
+                                <input type="radio" name="eventType" value="festival" required>
+                                <div class="type-content">
+                                    <span class="type-icon">🎪</span>
+                                    <span class="type-name">Festival</span>
+                                </div>
+                            </label>
+                            <label class="event-type-card">
+                                <input type="radio" name="eventType" value="concierto" required>
+                                <div class="type-content">
+                                    <span class="type-icon">🎵</span>
+                                    <span class="type-name">Concierto</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Información Básica -->
+                    <div class="card">
+                        <h2 class="card-title">
+                            <span class="title-icon">📝</span>
+                            Información Básica
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="eventName">Nombre del Evento *</label>
+                                <input type="text" id="eventName" name="eventName" placeholder="Ej: Concierto de Rosalía" required>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="eventDescription">Descripción *</label>
+                                <textarea id="eventDescription" name="eventDescription" rows="4" placeholder="Describe tu evento..." required></textarea>
+                            </div>
+
+                            <!-- Campo específico de CINE -->
+                            <div class="form-group field-cine" style="display: none;">
+                                <label for="movieTitle">Título de la Película *</label>
+                                <input type="text" id="movieTitle" name="movieTitle" placeholder="Nombre de la película">
+                            </div>
+
+                            <div class="form-group field-cine" style="display: none;">
+                                <label for="movieDirector">Director</label>
+                                <input type="text" id="movieDirector" name="movieDirector" placeholder="Nombre del director">
+                            </div>
+
+                            <!-- Campo específico de CONCIERTO -->
+                            <div class="form-group field-concierto" style="display: none;">
+                                <label for="artistName">Artista / Banda *</label>
+                                <input type="text" id="artistName" name="artistName" placeholder="Nombre del artista">
+                            </div>
+
+                            <!-- Campo específico de FESTIVAL -->
+                            <div class="form-group field-festival" style="display: none;">
+                                <label for="festivalLineup">Artistas Principales</label>
+                                <input type="text" id="festivalLineup" name="festivalLineup" placeholder="Ej: Rosalía, C. Tangana, Bad Bunny">
+                            </div>
+
+                            <div class="form-group field-festival" style="display: none;">
+                                <label for="festivalDays">Número de Días</label>
+                                <input type="number" id="festivalDays" name="festivalDays" placeholder="Ej: 3" min="1">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="eventGenre">Género *</label>
+                                <select id="eventGenre" name="eventGenre" required>
+                                    <option value="">Selecciona un género</option>
+                                    <!-- Opciones CINE -->
+                                    <option value="accion" class="genre-cine" style="display: none;">Acción</option>
+                                    <option value="comedia" class="genre-cine" style="display: none;">Comedia</option>
+                                    <option value="drama" class="genre-cine" style="display: none;">Drama</option>
+                                    <option value="terror" class="genre-cine" style="display: none;">Terror</option>
+                                    <option value="ciencia-ficcion" class="genre-cine" style="display: none;">Ciencia Ficción</option>
+                                    <option value="animacion" class="genre-cine" style="display: none;">Animación</option>
+                                    <option value="documental" class="genre-cine" style="display: none;">Documental</option>
+                                    <option value="romance" class="genre-cine" style="display: none;">Romance</option>
+                                    <option value="thriller" class="genre-cine" style="display: none;">Thriller</option>
+                                    <!-- Opciones MÚSICA (Concierto) -->
+                                    <option value="pop" class="genre-music" style="display: none;">Pop</option>
+                                    <option value="rock" class="genre-music" style="display: none;">Rock</option>
+                                    <option value="electronica" class="genre-music" style="display: none;">Electrónica</option>
+                                    <option value="reggaeton" class="genre-music" style="display: none;">Reggaeton</option>
+                                    <option value="jazz" class="genre-music" style="display: none;">Jazz</option>
+                                    <option value="clasica" class="genre-music" style="display: none;">Clásica</option>
+                                    <option value="indie" class="genre-music" style="display: none;">Indie</option>
+                                    <option value="rap" class="genre-music" style="display: none;">Rap/Hip-Hop</option>
+                                    <option value="flamenco" class="genre-music" style="display: none;">Flamenco</option>
+                                    <option value="metal" class="genre-music" style="display: none;">Metal</option>
+                                    <option value="folk" class="genre-music" style="display: none;">Folk</option>
+                                    <!-- Opciones FESTIVAL -->
+                                    <option value="multigenero" class="genre-festival" style="display: none;">Multigénero</option>
+                                    <option value="electronica-festival" class="genre-festival" style="display: none;">Electrónica</option>
+                                    <option value="rock-festival" class="genre-festival" style="display: none;">Rock</option>
+                                    <option value="indie-festival" class="genre-festival" style="display: none;">Indie</option>
+                                    <option value="urbano" class="genre-festival" style="display: none;">Urbano</option>
+                                    <option value="alternativo" class="genre-festival" style="display: none;">Alternativo</option>
+                                </select>
+                            </div>
+
+                            <!-- Campo específico de CINE -->
+                            <div class="form-group field-cine" style="display: none;">
+                                <label for="movieRating">Clasificación</label>
+                                <select id="movieRating" name="movieRating">
+                                    <option value="">Selecciona</option>
+                                    <option value="ATP">Apta para todos</option>
+                                    <option value="7">Mayores de 7 años</option>
+                                    <option value="12">Mayores de 12 años</option>
+                                    <option value="16">Mayores de 16 años</option>
+                                    <option value="18">Mayores de 18 años</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="eventImage">URL de la Imagen *</label>
+                                <input type="url" id="eventImage" name="eventImage" placeholder="https://ejemplo.com/imagen.jpg" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="eventDuration">Duración</label>
+                                <input type="text" id="eventDuration" name="eventDuration" placeholder="Ej: 2h 30min">
+                            </div>
+
+                            <!-- Campo específico de CINE -->
+                            <div class="form-group field-cine" style="display: none;">
+                                <label for="movieLanguage">Idioma</label>
+                                <select id="movieLanguage" name="movieLanguage">
+                                    <option value="">Selecciona</option>
+                                    <option value="es">Español</option>
+                                    <option value="en">Inglés</option>
+                                    <option value="en-sub">Inglés subtitulado</option>
+                                    <option value="vo">Versión original</option>
+                                </select>
+                            </div>
+
+                            <!-- Campo específico de CONCIERTO -->
+                            <div class="form-group full-width field-concierto" style="display: none;">
+                                <label for="supportActs">Artistas de Apertura</label>
+                                <input type="text" id="supportActs" name="supportActs" placeholder="Artistas que abren el concierto">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ubicación y Fecha -->
+                    <div class="card">
+                        <h2 class="card-title">
+                            <span class="title-icon">📍</span>
+                            Ubicación y Fecha
+                        </h2>
+                        <div class="form-grid">
+                            <!-- Campo específico de CINE -->
+                            <div class="form-group field-cine" style="display: none;">
+                                <label for="cinemaName">Nombre del Cine *</label>
+                                <input type="text" id="cinemaName" name="cinemaName" placeholder="Ej: Cinesa Diagonal">
+                            </div>
+
+                            <div class="form-group field-cine" style="display: none;">
+                                <label for="cinemaRoom">Sala</label>
+                                <input type="text" id="cinemaRoom" name="cinemaRoom" placeholder="Ej: Sala 3">
+                            </div>
+
+                            <!-- Campos para CONCIERTO y FESTIVAL -->
+                            <div class="form-group field-concierto field-festival" style="display: none;">
+                                <label for="eventVenue">Recinto / Estadio *</label>
+                                <input type="text" id="eventVenue" name="eventVenue" placeholder="Ej: Wizink Center">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="eventCity">Ciudad *</label>
+                                <input type="text" id="eventCity" name="eventCity" placeholder="Ej: Madrid" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="eventAddress">Dirección Completa *</label>
+                                <input type="text" id="eventAddress" name="eventAddress" placeholder="Calle, número, código postal" required>
+                            </div>
+
+                            <!-- Campo específico de CONCIERTO y FESTIVAL -->
+                            <div class="form-group field-concierto field-festival" style="display: none;">
+                                <label for="eventCapacity">Capacidad Total</label>
+                                <input type="number" id="eventCapacity" name="eventCapacity" placeholder="Ej: 5000" min="1">
+                            </div>
+
+                            <!-- Campo específico de CINE -->
+                            <div class="form-group field-cine" style="display: none;">
+                                <label for="cinemaSeats">Capacidad de la Sala</label>
+                                <input type="number" id="cinemaSeats" name="cinemaSeats" placeholder="Ej: 150" min="1">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="eventDate">
+                                    <span class="date-label-default">Fecha del Evento *</span>
+                                    <span class="date-label-cinema" style="display: none;">Fecha de Estreno *</span>
+                                </label>
+                                <input type="date" id="eventDate" name="eventDate" required>
+                            </div>
+
+                            <!-- Campo específico de CINE -->
+                            <div class="form-group field-cine" style="display: none;">
+                                <label for="cinemaShowtimes">Horarios de Función</label>
+                                <input type="text" id="cinemaShowtimes" name="cinemaShowtimes" placeholder="Ej: 16:00, 18:30, 21:00">
+                            </div>
+
+                            <!-- Campos para CONCIERTO y FESTIVAL -->
+                            <div class="form-group field-concierto field-festival" style="display: none;">
+                                <label for="eventTime">Hora de Inicio *</label>
+                                <input type="time" id="eventTime" name="eventTime">
+                            </div>
+
+                            <!-- Campo específico de FESTIVAL -->
+                            <div class="form-group field-festival" style="display: none;">
+                                <label for="eventEndDate">Fecha de Fin *</label>
+                                <input type="date" id="eventEndDate" name="eventEndDate">
+                            </div>
+
+                            <!-- Campos para CONCIERTO y FESTIVAL -->
+                            <div class="form-group field-concierto field-festival" style="display: none;">
+                                <label for="eventDoors">Apertura de Puertas</label>
+                                <input type="time" id="eventDoors" name="eventDoors">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Precios y Entradas -->
+                    <div class="card">
+                        <h2 class="card-title">
+                            <span class="title-icon">💰</span>
+                            Precios y Entradas
+                        </h2>
+                        
+                        <div id="ticketTypes">
+                            <div class="ticket-type-item">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Tipo de Entrada *</label>
+                                        <input type="text" name="ticketTypeName[]" placeholder="Ej: General, VIP, Platea" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Precio (€) *</label>
+                                        <input type="number" name="ticketTypePrice[]" placeholder="0.00" step="0.01" min="0" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Cantidad Disponible *</label>
+                                        <input type="number" name="ticketTypeQuantity[]" placeholder="100" min="1" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Descripción</label>
+                                        <input type="text" name="ticketTypeDescription[]" placeholder="Detalles de esta entrada">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-remove-ticket" style="display: none;">
+                                    <span>🗑️</span>
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-add-ticket" id="addTicketBtn">
+                            <span>➕</span>
+                            Añadir Tipo de Entrada
+                        </button>
+                    </div>
+
+                    <!-- Información Adicional -->
+                    <div class="card">
+                        <h2 class="card-title">
+                            <span class="title-icon">ℹ️</span>
+                            Información Adicional
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="eventRestrictions">Restricciones de Edad</label>
+                                <select id="eventRestrictions" name="eventRestrictions">
+                                    <option value="todos">Todos los públicos</option>
+                                    <option value="12">Mayores de 12 años</option>
+                                    <option value="16">Mayores de 16 años</option>
+                                    <option value="18">Mayores de 18 años</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="eventRules">Normas del Evento</label>
+                                <textarea id="eventRules" name="eventRules" rows="3" placeholder="Ej: No se permiten cámaras profesionales, No se puede fumar..."></textarea>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="eventContact">Email de Contacto *</label>
+                                <input type="email" id="eventContact" name="eventContact" placeholder="contacto@evento.com" required>
+                            </div>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="eventParking" id="eventParking">
+                                <span>Parking disponible</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="eventAccessible" id="eventAccessible">
+                                <span>Acceso para personas con movilidad reducida</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="eventFood" id="eventFood">
+                                <span>Servicio de comida y bebida</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="saveDraftBtn">
+                            <span>💾</span>
+                            Guardar Borrador
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <span>🚀</span>
+                            Publicar Evento
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Vista Previa -->
+            <aside class="preview-sidebar" id="previewSidebar">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <h3>Vista Previa</h3>
+                        <button class="preview-close" id="previewClose">✕</button>
+                    </div>
+                    
+                    <div class="preview-content">
+                        <div class="preview-image-wrapper">
+                            <img id="previewImage" src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=250&fit=crop" alt="Preview">
+                            <span class="preview-badge" id="previewType">Tipo</span>
+                        </div>
+                        
+                        <div class="preview-info">
+                            <h2 id="previewTitle">Nombre del Evento</h2>
+                            <p class="preview-artist" id="previewArtist">Artista</p>
+                            
+                            <div class="preview-details">
+                                <div class="preview-detail-item">
+                                    <span class="detail-icon">📅</span>
+                                    <span id="previewDate">Fecha</span>
+                                </div>
+                                <div class="preview-detail-item">
+                                    <span class="detail-icon">🕐</span>
+                                    <span id="previewTime">Hora</span>
+                                </div>
+                                <div class="preview-detail-item">
+                                    <span class="detail-icon">📍</span>
+                                    <span id="previewLocation">Ubicación</span>
+                                </div>
+                            </div>
+
+                            <div class="preview-description">
+                                <p id="previewDesc">Descripción del evento...</p>
+                            </div>
+
+                            <div class="preview-price">
+                                <span class="price-label">Desde</span>
+                                <span class="price-value" id="previewPrice">€0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div class="success-modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-icon">🎉</div>
+            <h2>¡Evento Creado Exitosamente!</h2>
+            <p>Tu evento ha sido publicado y ya está disponible para los usuarios.</p>
+            <div class="modal-actions">
+                <button class="btn-primary" id="viewEventBtn">Ver Evento</button>
+                <button class="btn-secondary" id="createAnotherBtn">Crear Otro</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/create-event.js}"></script>
+</body>
+</html>
