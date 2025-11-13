@@ -81,7 +81,7 @@ public class UsuarioController {
     @GetMapping("/profile")
     public String mostrarPerfil() {
         return "usuarios/profile";
-    }
+    }  
 
     // ==================== REGISTRO ====================
 
@@ -118,7 +118,7 @@ public class UsuarioController {
      */
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         try {
             // 1️. Verificar si el usuario existe
             if (!usuarioService.existePorEmail(loginRequest.getEmail())) {
@@ -145,6 +145,7 @@ public class UsuarioController {
             cookie.setMaxAge(24 * 60 * 60);
 
             // Añadir cookie a la respuesta
+            response.addCookie(cookie);
             return ResponseEntity.ok("Login exitoso"); 
 
         } catch (BadCredentialsException e) {
@@ -173,38 +174,7 @@ public class UsuarioController {
         response.sendRedirect("/usuarios/login");
     }
 
-    // ==================== VERIFICACIÓN ====================
-
-    /**
-     * Verifica si un usuario existe y si sus credenciales son correctas.
-     * <p>
-     * Si es correcto, redirige al perfil del usuario, de lo contrario,
-     * redirige al login con un mensaje de error.
-     * </p>
-     *
-     * @param loginRequest credenciales del usuario.
-     * @param response     objeto HTTP para redirección.
-     * @throws IOException si ocurre un error durante la redirección.
-     */
-    @PostMapping("/verificar")
-    public void verificarUsuario(LoginRequest loginRequest, HttpServletResponse response) throws IOException {
-        if (!usuarioService.existePorEmail(loginRequest.getEmail())) {
-            response.sendRedirect("/usuarios/login?error=usuario_no_existe");
-            return;
-        }
-
-        boolean correcto = usuarioService.verificarCredenciales(
-            loginRequest.getEmail(), loginRequest.getPassword()
-        );
-
-        if (!correcto) {
-            response.sendRedirect("/usuarios/login?error=contraseña_incorrecta");
-            return;
-        }
-
-        response.sendRedirect("/usuarios/profile");
-    }
-
+   
     // ==================== PERFIL ====================
 
     /**

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Eventos - EventZone</title>
+    <link rel="stylesheet" th:href="@{/css/lista.css}">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">📅</div>
+                    <h1>EventZone</h1>
+                </div>
+                <nav class="header-nav">
+                    <a th:href="@{/eventos/lista}" class="nav-link">Eventos</a>
+                    <a th:href="@{/perfil}" class="nav-link">Mi Perfil</a>
+                    <form th:action="@{/logout}" method="post" style="display:inline;">
+                        <button type="submit" class="logout-btn">
+                            <span>🚪</span>
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container main-container">
+        <h1>Lista de Eventos</h1>
+
+        <div th:if="${#lists.isEmpty(eventos)}">
+            <p>No hay eventos registrados todavía.</p>
+        </div>
+
+        <div class="event-list" th:if="${!#lists.isEmpty(eventos)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Ciudad</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="evento : ${eventos}">
+                        <td data-label="Nombre" th:text="${evento.nombre}">Nombre evento</td>
+                        <td data-label="Tipo" th:text="${evento.tipo}">Tipo</td>
+                        <td data-label="Ciudad" th:text="${evento.ciudad}">Ciudad</td>
+                        <td data-label="Fecha" th:text="${evento.fecha}">Fecha</td>
+                        <td data-label="Acciones">
+                            <a th:href="@{'/eventos/editar/' + ${evento.id}}" class="btn-edit">✏️ Editar</a>
+                            <a th:href="@{'/eventos/eliminar/' + ${evento.id}}" class="btn-delete" 
+                               onclick="return confirm('¿Seguro que deseas eliminar este evento?');">
+                                🗑️ Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="actions">
+            <a th:href="@{/eventos/crear}" class="btn-primary">➕ Crear Nuevo Evento</a>
+        </div>
+    </div>
+</body>
+</html>
