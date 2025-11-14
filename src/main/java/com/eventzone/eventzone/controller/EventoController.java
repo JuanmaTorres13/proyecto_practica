@@ -22,7 +22,7 @@ public class EventoController {
 
     // ===== VISTAS =====
     @GetMapping("/crear")
-    public String mostrarCrearEvento() { return "eventos/crear"; }
+    public String mostrarCrearEvento() { return "eventos/create_event"; }
 
     @GetMapping("/lista")
     public String listarEventos(org.springframework.ui.Model model) {
