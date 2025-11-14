@@ -1,322 +1,307 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - EventZone</title>
-    <link rel="stylesheet" th:href="@{/css/profile.css}" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Perfil - EventZone</title>
+<link rel="stylesheet" th:href="@{/css/profile.css}" />
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <div class="logo-icon">📅</div>
-                    <h1>EventZone</h1>
-                </div>
-                
-                <button class="logout-btn">
-                    <span class="logout-icon">🚪</span>
-                    <span class="logout-text">Cerrar sesión</span>
-                </button>
-            </div>
-        </div>
-    </header>
+	<header class="header">
+		<div class="container">
+			<div class="header-content">
+				<div class="logo">
+					<div class="logo-icon">📅</div>
+					<h1>EventZone</h1>
+				</div>
 
-    <div class="container main-container">
-        <div class="profile-layout">
-            <aside class="sidebar">
-                <div class="sidebar-card">
-                    <div class="user-avatar-section">
-                        <div class="user-avatar" id="userAvatar">MG</div>
-                        <h2 class="user-name" id="userName">María García</h2>
-                        <p class="user-email" id="userEmail">maria.garcia@email.com</p>
-                    </div>
+				<button class="logout-btn">
+					<span class="logout-icon">🚪</span> <span class="logout-text">Cerrar
+						sesión</span>
+				</button>
+			</div>
+		</div>
+	</header>
 
-                    <nav class="sidebar-menu">
-                        <button class="menu-item active" data-tab="profile">
-                            <span class="menu-icon">👤</span>
-                            <span>Mi Perfil</span>
-                        </button>
-                        <button class="menu-item" data-tab="tickets">
-                            <span class="menu-icon">🎫</span>
-                            <span>Mis Entradas</span>
-                        </button>
-                        <button class="menu-item" data-tab="favorites">
-                            <span class="menu-icon">❤️</span>
-                            <span>Favoritos</span>
-                        </button>
-                        <button class="menu-item" data-tab="settings">
-                            <span class="menu-icon">⚙️</span>
-                            <span>Configuración</span>
-                        </button>
-                    </nav>
+	<div class="container main-container">
+		<div class="profile-layout">
+			<aside class="sidebar">
+				<div class="sidebar-card">
+					<div class="user-avatar-section">
+						<div class="user-avatar" id="userAvatar">MG</div>
+						<h2 class="user-name" id="userName">María García</h2>
+						<p class="user-email" id="userEmail">maria.garcia@email.com</p>
+					</div>
 
-                    <div class="user-stats">
-                        <div class="stat-item">
-                            <div class="stat-number" id="ticketsCount">3</div>
-                            <div class="stat-label">Entradas</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number" id="favoritesCount">2</div>
-                            <div class="stat-label">Favoritos</div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
+					<nav class="sidebar-menu">
+						<button class="menu-item active" data-tab="profile">
+							<span class="menu-icon">👤</span> <span>Mi Perfil</span>
+						</button>
+						<button class="menu-item" data-tab="tickets">
+							<span class="menu-icon">🎫</span> <span>Mis Entradas</span>
+						</button>
+						<button class="menu-item" data-tab="favorites">
+							<span class="menu-icon">❤️</span> <span>Favoritos</span>
+						</button>
+						<button class="menu-item" data-tab="settings">
+							<span class="menu-icon">⚙️</span> <span>Configuración</span>
+						</button>
+					</nav>
 
-            <main class="main-content">
-                <div class="tab-content active" id="profileTab">
-                    <div class="content-card">
-                        <div class="card-header">
-                            <h2>Información Personal</h2>
-                            <button class="edit-btn" id="editBtn">
-                                <span>✏️</span>
-                                Editar
-                            </button>
-                            <div class="edit-actions" id="editActions" style="display: none;">
-                                <button class="save-btn" id="saveBtn">
-                                    <span>💾</span>
-                                    Guardar
-                                </button>
-                                <button class="cancel-btn" id="cancelBtn">
-                                    <span>❌</span>
-                                    Cancelar
-                                </button>
-                            </div>
-                        </div>
+					<div class="user-stats">
+						<div class="stat-item">
+							<div class="stat-number" id="ticketsCount">3</div>
+							<div class="stat-label">Entradas</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-number" id="favoritesCount">2</div>
+							<div class="stat-label">Favoritos</div>
+						</div>
+					</div>
+				</div>
+			</aside>
 
-                        <div class="form-grid">
-                            <div class="form-field">
-                                <label class="field-label">
-                                    <span class="label-icon">👤</span>
-                                    Nombre completo
-                                </label>
-                                <input type="text" id="nombre" class="field-input" value="María García" readonly>
-                            </div>
+			<main class="main-content">
+				<div class="tab-content active" id="profileTab">
+					<div class="content-card">
+						<div class="card-header">
+							<h2>Información Personal</h2>
+							<button class="edit-btn" id="editBtn">
+								<span>✏️</span> Editar
+							</button>
+							<div class="edit-actions" id="editActions" style="display: none;">
+								<button class="save-btn" id="saveBtn">
+									<span>💾</span> Guardar
+								</button>
+								<button class="cancel-btn" id="cancelBtn">
+									<span>❌</span> Cancelar
+								</button>
+							</div>
+						</div>
 
-                            <div class="form-field">
-                                <label class="field-label">
-                                    <span class="label-icon">📧</span>
-                                    Email
-                                </label>
-                                <input type="email" id="email" class="field-input" value="maria.garcia@email.com" readonly>
-                            </div>
+						<div class="form-grid">
+							<div class="form-field">
+								<label class="field-label"> <span class="label-icon">👤</span>
+									Nombre completo
+								</label> <input type="text" id="nombre" class="field-input"
+									value="María García" readonly>
+							</div>
 
-                            <div class="form-field">
-                                <label class="field-label">
-                                    <span class="label-icon">📱</span>
-                                    Teléfono
-                                </label>
-                                <input type="tel" id="telefono" class="field-input" value="+34 612 345 678" readonly>
-                            </div>
+							<div class="form-field">
+								<label class="field-label"> <span class="label-icon">📧</span>
+									Email
+								</label> <input type="email" id="email" class="field-input"
+									value="maria.garcia@email.com" readonly>
+							</div>
 
-                            <div class="form-field">
-                                <label class="field-label">
-                                    <span class="label-icon">📍</span>
-                                    Ciudad
-                                </label>
-                                <input type="text" id="ciudad" class="field-input" value="Madrid, España" readonly>
-                            </div>
+							<div class="form-field">
+								<label class="field-label"> <span class="label-icon">📱</span>
+									Teléfono
+								</label> <input type="tel" id="telefono" class="field-input"
+									value="+34 612 345 678" readonly>
+							</div>
 
-                            <div class="form-field">
-                                <label class="field-label">
-                                    <span class="label-icon">📅</span>
-                                    Fecha de nacimiento
-                                </label>
-                                <input type="date" id="fechaNacimiento" class="field-input" value="15/03/1995" readonly>
-                            </div>
+							<div class="form-field">
+								<label class="field-label"> <span class="label-icon">📍</span>
+									Ciudad
+								</label> <input type="text" id="ciudad" class="field-input"
+									value="Madrid, España" readonly>
+							</div>
 
-                            <div class="form-field full-width">
-                                <label class="field-label">
-                                    <span class="label-icon">📝</span>
-                                    Biografía
-                                </label>
-                                <textarea id="bio" class="field-textarea" readonly>Amante de la música y los festivales. Siempre buscando nuevos eventos para disfrutar.</textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+							<div class="form-field">
+								<label class="field-label"> <span class="label-icon">📅</span>
+									Fecha de nacimiento
+								</label> <input type="date" id="fechaNacimiento" class="field-input"
+									value="15/03/1995" readonly>
+							</div>
 
-                <div class="tab-content" id="ticketsTab">
-                    <h2 class="section-title">Mis Entradas</h2>
-                    <div class="tickets-list">
-                        <div class="ticket-card">
-                            <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=300&h=200&fit=crop" alt="Rosalía World Tour" class="ticket-image">
-                            <div class="ticket-info">
-                                <div class="ticket-header">
-                                    <h3>Rosalía World Tour</h3>
-                                    <span class="badge badge-success">Confirmado</span>
-                                </div>
-                                <div class="ticket-details">
-                                    <p class="detail-item">
-                                        <span class="detail-icon">📅</span>
-                                        15 Nov 2025
-                                    </p>
-                                    <p class="detail-item">
-                                        <span class="detail-icon">📍</span>
-                                        Wizink Center, Madrid
-                                    </p>
-                                    <p class="detail-item price">
-                                        <span class="detail-icon">💳</span>
-                                        €45
-                                    </p>
-                                </div>
-                                <div class="ticket-actions">
-                                    <button class="btn-primary">Ver entrada</button>
-                                    <button class="btn-secondary">Descargar</button>
-                                </div>
-                            </div>
-                        </div>
+							<div class="form-field full-width">
+								<label class="field-label"> <span class="label-icon">📝</span>
+									Biografía
+								</label>
+								<textarea id="bio" class="field-textarea" readonly>Amante de la música y los festivales. Siempre buscando nuevos eventos para disfrutar.</textarea>
+							</div>
+						</div>
+					</div>
+				</div>
 
-                        <div class="ticket-card">
-                            <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=300&h=200&fit=crop" alt="Festival Primavera Sound" class="ticket-image">
-                            <div class="ticket-info">
-                                <div class="ticket-header">
-                                    <h3>Festival Primavera Sound</h3>
-                                    <span class="badge badge-success">Confirmado</span>
-                                </div>
-                                <div class="ticket-details">
-                                    <p class="detail-item">
-                                        <span class="detail-icon">📅</span>
-                                        1-3 Jun 2025
-                                    </p>
-                                    <p class="detail-item">
-                                        <span class="detail-icon">📍</span>
-                                        Barcelona
-                                    </p>
-                                    <p class="detail-item price">
-                                        <span class="detail-icon">💳</span>
-                                        €220
-                                    </p>
-                                </div>
-                                <div class="ticket-actions">
-                                    <button class="btn-primary">Ver entrada</button>
-                                    <button class="btn-secondary">Descargar</button>
-                                </div>
-                            </div>
-                        </div>
+				<div class="tab-content" id="ticketsTab">
+					<h2 class="section-title">Mis Entradas</h2>
+					<div class="tickets-list">
+						<div class="ticket-card">
+							<img
+								src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=300&h=200&fit=crop"
+								alt="Rosalía World Tour" class="ticket-image">
+							<div class="ticket-info">
+								<div class="ticket-header">
+									<h3>Rosalía World Tour</h3>
+									<span class="badge badge-success">Confirmado</span>
+								</div>
+								<div class="ticket-details">
+									<p class="detail-item">
+										<span class="detail-icon">📅</span> 15 Nov 2025
+									</p>
+									<p class="detail-item">
+										<span class="detail-icon">📍</span> Wizink Center, Madrid
+									</p>
+									<p class="detail-item price">
+										<span class="detail-icon">💳</span> €45
+									</p>
+								</div>
+								<div class="ticket-actions">
+									<button class="btn-primary">Ver entrada</button>
+									<button class="btn-secondary">Descargar</button>
+								</div>
+							</div>
+						</div>
 
-                        <div class="ticket-card">
-                            <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=300&h=200&fit=crop" alt="C. Tangana en Concierto" class="ticket-image">
-                            <div class="ticket-info">
-                                <div class="ticket-header">
-                                    <h3>C. Tangana en Concierto</h3>
-                                    <span class="badge badge-pending">Pendiente</span>
-                                </div>
-                                <div class="ticket-details">
-                                    <p class="detail-item">
-                                        <span class="detail-icon">📅</span>
-                                        22 Nov 2025
-                                    </p>
-                                    <p class="detail-item">
-                                        <span class="detail-icon">📍</span>
-                                        Palau Sant Jordi, Barcelona
-                                    </p>
-                                    <p class="detail-item price">
-                                        <span class="detail-icon">💳</span>
-                                        €38
-                                    </p>
-                                </div>
-                                <div class="ticket-actions">
-                                    <button class="btn-primary">Ver entrada</button>
-                                    <button class="btn-secondary">Descargar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+						<div class="ticket-card">
+							<img
+								src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=300&h=200&fit=crop"
+								alt="Festival Primavera Sound" class="ticket-image">
+							<div class="ticket-info">
+								<div class="ticket-header">
+									<h3>Festival Primavera Sound</h3>
+									<span class="badge badge-success">Confirmado</span>
+								</div>
+								<div class="ticket-details">
+									<p class="detail-item">
+										<span class="detail-icon">📅</span> 1-3 Jun 2025
+									</p>
+									<p class="detail-item">
+										<span class="detail-icon">📍</span> Barcelona
+									</p>
+									<p class="detail-item price">
+										<span class="detail-icon">💳</span> €220
+									</p>
+								</div>
+								<div class="ticket-actions">
+									<button class="btn-primary">Ver entrada</button>
+									<button class="btn-secondary">Descargar</button>
+								</div>
+							</div>
+						</div>
 
-                <div class="tab-content" id="favoritesTab">
-                    <h2 class="section-title">Eventos Favoritos</h2>
-                    <div class="favorites-grid">
-                        <div class="favorite-card">
-                            <img src="https://images.unsplash.com/photo-1506157786151-b8491531f063?w=300&h=200&fit=crop" alt="Mad Cool Festival 2026" class="favorite-image">
-                            <div class="favorite-info">
-                                <h3>Mad Cool Festival 2026</h3>
-                                <p class="favorite-date">
-                                    <span>📅</span>
-                                    8-12 Jul 2026
-                                </p>
-                                <div class="favorite-actions">
-                                    <button class="btn-primary btn-full">Comprar</button>
-                                    <button class="btn-icon btn-remove">❤️</button>
-                                </div>
-                            </div>
-                        </div>
+						<div class="ticket-card">
+							<img
+								src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=300&h=200&fit=crop"
+								alt="C. Tangana en Concierto" class="ticket-image">
+							<div class="ticket-info">
+								<div class="ticket-header">
+									<h3>C. Tangana en Concierto</h3>
+									<span class="badge badge-pending">Pendiente</span>
+								</div>
+								<div class="ticket-details">
+									<p class="detail-item">
+										<span class="detail-icon">📅</span> 22 Nov 2025
+									</p>
+									<p class="detail-item">
+										<span class="detail-icon">📍</span> Palau Sant Jordi,
+										Barcelona
+									</p>
+									<p class="detail-item price">
+										<span class="detail-icon">💳</span> €38
+									</p>
+								</div>
+								<div class="ticket-actions">
+									<button class="btn-primary">Ver entrada</button>
+									<button class="btn-secondary">Descargar</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
-                        <div class="favorite-card">
-                            <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=300&h=200&fit=crop" alt="Billie Eilish Tour" class="favorite-image">
-                            <div class="favorite-info">
-                                <h3>Billie Eilish Tour</h3>
-                                <p class="favorite-date">
-                                    <span>📅</span>
-                                    20 Dic 2025
-                                </p>
-                                <div class="favorite-actions">
-                                    <button class="btn-primary btn-full">Comprar</button>
-                                    <button class="btn-icon btn-remove">❤️</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+				<div class="tab-content" id="favoritesTab">
+					<h2 class="section-title">Eventos Favoritos</h2>
+					<div class="favorites-grid">
+						<div class="favorite-card">
+							<img
+								src="https://images.unsplash.com/photo-1506157786151-b8491531f063?w=300&h=200&fit=crop"
+								alt="Mad Cool Festival 2026" class="favorite-image">
+							<div class="favorite-info">
+								<h3>Mad Cool Festival 2026</h3>
+								<p class="favorite-date">
+									<span>📅</span> 8-12 Jul 2026
+								</p>
+								<div class="favorite-actions">
+									<button class="btn-primary btn-full">Comprar</button>
+									<button class="btn-icon btn-remove">❤️</button>
+								</div>
+							</div>
+						</div>
 
-                <div class="tab-content" id="settingsTab">
-                    <div class="content-card">
-                        <h2 class="section-title">Configuración</h2>
-                        
-                        <div class="settings-list">
-                            <div class="setting-item">
-                                <div class="setting-info">
-                                    <span class="setting-icon">🔔</span>
-                                    <div>
-                                        <h3>Notificaciones</h3>
-                                        <p>Recibir alertas de nuevos eventos</p>
-                                    </div>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
+						<div class="favorite-card">
+							<img
+								src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=300&h=200&fit=crop"
+								alt="Billie Eilish Tour" class="favorite-image">
+							<div class="favorite-info">
+								<h3>Billie Eilish Tour</h3>
+								<p class="favorite-date">
+									<span>📅</span> 20 Dic 2025
+								</p>
+								<div class="favorite-actions">
+									<button class="btn-primary btn-full">Comprar</button>
+									<button class="btn-icon btn-remove">❤️</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
-                            <div class="setting-item">
-                                <div class="setting-info">
-                                    <span class="setting-icon">🛡️</span>
-                                    <div>
-                                        <h3>Privacidad</h3>
-                                        <p>Perfil visible para otros usuarios</p>
-                                    </div>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
+				<div class="tab-content" id="settingsTab">
+					<div class="content-card">
+						<h2 class="section-title">Configuración</h2>
 
-                            <div class="setting-item">
-                                <div class="setting-info">
-                                    <span class="setting-icon">📧</span>
-                                    <div>
-                                        <h3>Newsletter</h3>
-                                        <p>Recibir ofertas y promociones</p>
-                                    </div>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
+						<div class="settings-list">
+							<div class="setting-item">
+								<div class="setting-info">
+									<span class="setting-icon">🔔</span>
+									<div>
+										<h3>Notificaciones</h3>
+										<p>Recibir alertas de nuevos eventos</p>
+									</div>
+								</div>
+								<label class="switch"> <input type="checkbox" checked>
+									<span class="slider"></span>
+								</label>
+							</div>
 
-                            <button class="btn-danger">Eliminar cuenta</button>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
+							<div class="setting-item">
+								<div class="setting-info">
+									<span class="setting-icon">🛡️</span>
+									<div>
+										<h3>Privacidad</h3>
+										<p>Perfil visible para otros usuarios</p>
+									</div>
+								</div>
+								<label class="switch"> <input type="checkbox"> <span
+									class="slider"></span>
+								</label>
+							</div>
 
-    <script th:src="@{/js/profile.js}"></script>
+							<div class="setting-item">
+								<div class="setting-info">
+									<span class="setting-icon">📧</span>
+									<div>
+										<h3>Newsletter</h3>
+										<p>Recibir ofertas y promociones</p>
+									</div>
+								</div>
+								<label class="switch"> <input type="checkbox" checked>
+									<span class="slider"></span>
+								</label>
+							</div>
+
+							<button class="btn-danger">Eliminar cuenta</button>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+	</div>
+	<script
+		src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+	<script src="/js/profile.js" th:src="@{/js/profile.js}"></script>
 </body>
 </html>

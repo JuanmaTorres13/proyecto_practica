@@ -1,10 +1,10 @@
 package com.eventzone.eventzone.controller;
 
 import com.eventzone.eventzone.dto.LoginRequest;
-import com.eventzone.eventzone.dto.LoginResponse;
 import com.eventzone.eventzone.dto.RegistroRequest;
 import com.eventzone.eventzone.dto.UsuarioResponse;
 import com.eventzone.eventzone.exception.EmailAlreadyExistsException;
+import com.eventzone.eventzone.model.Evento;
 import com.eventzone.eventzone.model.Usuario;
 import com.eventzone.eventzone.security.JwtUtil;
 import com.eventzone.eventzone.security.UsuarioDetailsService;
@@ -14,6 +14,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,22 +27,26 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controlador principal que gestiona todas las operaciones relacionadas con los usuarios.
+ * Controlador que gestiona todas las operaciones relacionadas con usuarios.
  * <p>
- * Se encarga de manejar el registro, login, logout, verificación de credenciales
- * y gestión del perfil del usuario autenticado.
+ * Este controlador maneja:
+ * <ul>
+ *     <li>Registro de usuarios</li>
+ *     <li>Login y logout</li>
+ *     <li>Gestión del perfil del usuario autenticado</li>
+ *     <li>Listado de todos los usuarios (solo admin)</li>
+ * </ul>
  * </p>
- *
- * <p>Los tokens JWT se generan en el login y se guardan en cookies seguras
- * para la autenticación en las rutas protegidas.</p>
- *
- * @author  
- * @version 1.0
+ * 
+ * <p>Los tokens JWT se generan en el login y se almacenan en cookies para
+ * la autenticación en rutas protegidas.</p>
+ * 
+ * @author 
+ * @version 1.1
  * @since 2025
  */
 @Controller
@@ -64,9 +70,9 @@ public class UsuarioController {
     // ==================== VISTAS ====================
 
     /**
-     * Muestra la vista del formulario de login.
-     *
-     * @return nombre de la plantilla Thymeleaf correspondiente.
+     * Muestra el formulario de login de usuarios.
+     * 
+     * @return nombre de la plantilla Thymeleaf para login
      */
     @GetMapping("/login")
     public String mostrarLogin() {
@@ -74,9 +80,9 @@ public class UsuarioController {
     }
 
     /**
-     * Muestra la vista del perfil del usuario.
-     *
-     * @return nombre de la plantilla Thymeleaf correspondiente.
+     * Muestra la vista del perfil del usuario autenticado.
+     * 
+     * @return nombre de la plantilla Thymeleaf para perfil
      */
     @GetMapping("/profile")
     public String mostrarPerfil() {
@@ -87,9 +93,9 @@ public class UsuarioController {
 
     /**
      * Registra un nuevo usuario en la base de datos.
-     *
-     * @param request DTO con los datos del registro del usuario.
-     * @return respuesta HTTP indicando éxito o error.
+     * 
+     * @param request DTO con los datos de registro del usuario
+     * @return ResponseEntity con mensaje de éxito o error
      */
     @PostMapping("/registro")
     @ResponseBody
@@ -107,25 +113,20 @@ public class UsuarioController {
     // ==================== LOGIN ====================
 
     /**
-     * Autentica un usuario, genera un token JWT y lo guarda en una cookie.
-     * <p>
-     * Si las credenciales son correctas, redirige al perfil del usuario.
-     * </p>
-     *
-     * @param loginRequest objeto con email y contraseña.
-     * @param response     respuesta HTTP donde se agregará la cookie JWT.
-     * @return una redirección al perfil o un error en caso de fallo.
+     * Autentica un usuario y genera un token JWT en cookie HTTP-only.
+     * 
+     * @param loginRequest objeto con email y contraseña
+     * @param response     objeto HttpServletResponse para agregar cookie
+     * @return ResponseEntity con mensaje de éxito o error
      */
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         try {
-            // 1️. Verificar si el usuario existe
             if (!usuarioService.existePorEmail(loginRequest.getEmail())) {
                 return ResponseEntity.status(404).body("Usuario no encontrado");
             }
 
-            // 2️. Autenticar
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                     loginRequest.getEmail(),
@@ -140,13 +141,17 @@ public class UsuarioController {
 
             Cookie cookie = new Cookie("jwt_token", token);
             cookie.setHttpOnly(true);
-            cookie.setSecure(false); // HTTPS en producción
+            cookie.setSecure(false);
             cookie.setPath("/");
             cookie.setMaxAge(24 * 60 * 60);
-
-            // Añadir cookie a la respuesta
             response.addCookie(cookie);
-            return ResponseEntity.ok("Login exitoso"); 
+
+            // Obtener el rol real del usuario
+            Usuario usuario = usuarioService.buscarPorEmail(loginRequest.getEmail());
+            return ResponseEntity.ok(Map.of(
+                "message", "Login exitoso",
+                "rol", usuario.getRol().getNombre()
+            ));
 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body("Contraseña incorrecta");
@@ -155,32 +160,30 @@ public class UsuarioController {
         }
     }
 
-
     // ==================== LOGOUT ====================
 
     /**
      * Cierra la sesión del usuario eliminando la cookie JWT.
-     *
-     * @param response objeto de respuesta HTTP.
-     * @throws IOException si ocurre un error al redirigir.
+     * 
+     * @param response HttpServletResponse para eliminar cookie y redirigir
+     * @throws IOException si ocurre un error al redirigir
      */
     @GetMapping("/logout")
     public void logout(HttpServletResponse response) throws IOException {
         Cookie cookie = new Cookie("jwt_token", "");
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(0); // elimina la cookie
+        cookie.setMaxAge(0); 
         response.addCookie(cookie);
         response.sendRedirect("/usuarios/login");
     }
 
-   
     // ==================== PERFIL ====================
 
     /**
-     * Obtiene la información del usuario autenticado usando el token JWT.
-     *
-     * @return {@link UsuarioResponse} con los datos del usuario autenticado.
+     * Obtiene los datos del usuario autenticado usando token JWT.
+     * 
+     * @return ResponseEntity con UsuarioResponse o error 401 si no está autenticado
      */
     @GetMapping("/me")
     @ResponseBody
@@ -209,10 +212,10 @@ public class UsuarioController {
     }
 
     /**
-     * Actualiza los datos del perfil del usuario autenticado en la base de datos.
-     *
-     * @param usuarioResponse objeto con los nuevos datos del usuario.
-     * @return mensaje de confirmación o error.
+     * Actualiza el perfil del usuario autenticado.
+     * 
+     * @param usuarioResponse DTO con los datos actualizados
+     * @return ResponseEntity con mensaje de éxito o error
      */
     @PutMapping("/me")
     @ResponseBody
@@ -237,5 +240,35 @@ public class UsuarioController {
         usuarioService.guardar(usuario);
 
         return ResponseEntity.ok("Perfil actualizado correctamente");
+    }
+
+    // ==================== LISTAR TODOS LOS USUARIOS (ADMIN) ====================
+
+    /**
+     * Devuelve la lista de todos los usuarios registrados.
+     * <p>Este endpoint está pensado para administradores.</p>
+     * 
+     * @return ResponseEntity con lista de usuarios o error 500
+     */
+    @GetMapping("/todos")
+    @ResponseBody
+    public ResponseEntity<?> listarUsuarios() {
+        try {
+            List<Usuario> usuarios = usuarioService.findAll();
+            return ResponseEntity.ok(usuarios);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener usuarios");
+        }
+    }
+    
+    @DeleteMapping("/eliminar/{email}")
+    @ResponseBody
+    public ResponseEntity<?> eliminarUsuario(@PathVariable String email) {
+    	
+        Usuario usuario = usuarioService.buscarPorEmail(email);
+        if (usuario == null) return ResponseEntity.status(404).body("Usuario no encontrado");
+
+        usuarioService.eliminar(usuario.getId());
+        return ResponseEntity.ok("Usuario eliminado correctamente");
     }
 }

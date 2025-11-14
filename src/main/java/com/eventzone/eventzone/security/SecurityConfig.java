@@ -70,6 +70,7 @@ public class SecurityConfig {
                                 "/usuarios/registro",
                                 "/usuarios/login",
                                 "/usuarios/verificar",
+                                "/eventos/**",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",

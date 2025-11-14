@@ -122,11 +122,19 @@ async function handleLogin(container) {
       body: JSON.stringify({ email, password }),
     });
 
-    if (response.ok) {
-      showMessage(container, "success", "Inicio de sesión exitoso. Redirigiendo...");
-      setTimeout(() => (window.location.href = "/usuarios/profile"), 1500);
-      return;
-    }
+	if (response.ok) {
+	    const data = await response.json(); 
+	    showMessage(container, "success", "Inicio de sesión exitoso. Redirigiendo...");
+
+	    setTimeout(() => {
+	        if (data.rol === "ADMIN") {
+	            window.location.href = "/admin/panel"; // página del admin
+	        } else {
+	            window.location.href = "/usuarios/profile"; // página normal
+	        }
+	    }, 1500);
+	    return;
+	}
 
     // Muestra mensajes específicos según el código
     if (response.status === 404) {

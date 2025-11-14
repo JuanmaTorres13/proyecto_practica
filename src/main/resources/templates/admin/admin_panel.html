@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrador - EventZone</title>
+<link rel="stylesheet" th:href="@{/css/admin_panel.css}">
+</head>
+
+<body>
+
+	<!-- HEADER SUPERIOR -->
+	<header class="header">
+		<div class="container header-content">
+			<div class="logo">
+				<div class="logo-icon">EZ</div>
+				<h1>EventZone - Admin</h1>
+			</div>
+
+			<button id="logoutBtn" class="logout-btn">
+				<span class="logout-text">Cerrar sesión</span>
+			</button>
+		</div>
+	</header>
+
+	<main class="main-container">
+		<div class="container profile-layout">
+
+			<!-- SIDEBAR -->
+			<aside class="sidebar-card">
+				<div class="user-avatar-section">
+					<div class="user-avatar">A</div>
+					<p class="user-name">Administrador</p>
+					<p class="user-email">admin@eventzone.com</p>
+				</div>
+
+				<nav class="sidebar-menu">
+					<button class="menu-item active" data-tab="tab-crear-evento">
+						<span class="menu-icon">🎫</span> Crear Evento
+					</button>
+					<button class="menu-item" data-tab="tab-lista-eventos">
+						<span class="menu-icon">📅</span> Lista de Eventos
+					</button>
+					<button class="menu-item" data-tab="tab-usuarios">
+						<span class="menu-icon">👤</span> Usuarios Registrados
+					</button>
+				</nav>
+			</aside>
+
+			<!-- CONTENIDO PRINCIPAL -->
+			<section class="main-content">
+
+				<!-- TAB CREAR EVENTO -->
+				<div class="tab-content active" id="tab-crear-evento">
+					<div class="content-card">
+						<h2 class="section-title">Crear Nuevo Evento</h2>
+
+						<form id="formCrearEvento" enctype="multipart/form-data">
+
+							<div class="form-grid">
+
+								<div class="form-field">
+									<label class="field-label">Título del Evento</label> <input
+										type="text" class="field-input" id="titulo" required>
+								</div>
+
+								<div class="form-field">
+									<label class="field-label">Categoría</label> <input type="text"
+										class="field-input" id="categoria" required>
+								</div>
+
+								<div class="form-field full-width">
+									<label class="field-label">Descripción</label>
+									<textarea class="field-textarea" id="descripcion" required></textarea>
+								</div>
+
+								<div class="form-field">
+									<label class="field-label">Fecha</label> <input type="date"
+										class="field-input" id="fecha" required>
+								</div>
+
+								<div class="form-field">
+									<label class="field-label">Hora</label> <input type="time"
+										class="field-input" id="hora" required>
+								</div>
+
+								<div class="form-field full-width">
+									<label class="field-label">Imagen del Evento</label> <input
+										type="file" class="field-input" id="imagen" accept="image/*"
+										required>
+								</div>
+
+							</div>
+
+							<button type="submit" class="btn-primary"
+								style="margin-top: 1rem;">Crear Evento</button>
+
+						</form>
+					</div>
+				</div>
+
+				<!-- TAB LISTA EVENTOS -->
+				<div class="tab-content" id="tab-lista-eventos">
+					<div class="content-card">
+						<h2 class="section-title">Eventos Creados</h2>
+
+						<div id="listaEventos" class="tickets-list">
+							<!-- Aquí se cargan los eventos con JS -->
+						</div>
+					</div>
+				</div>
+
+				<!-- TAB USUARIOS -->
+				<div class="tab-content" id="tab-usuarios">
+					<div class="content-card">
+						<h2 class="section-title">Usuarios Registrados</h2>
+
+						<div id="listaUsuarios" class="tickets-list">
+							<!-- Aquí se cargan los usuarios con JS -->
+						</div>
+					</div>
+				</div>
+
+			</section>
+
+		</div>
+	</main>
+	<script
+		src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+	<script src="/js/admin_panel.js" th:src="@{/js/admin_panel.js}"></script>
+</body>
+</html>
