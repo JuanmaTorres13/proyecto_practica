@@ -17,47 +17,37 @@ public class Evento {
     private String tipo;             // cine, concierto, festival
     private String nombre;
     @Column(length = 5000)
-    private String descripcion;
-
-    private String genero;
-
-    private String imagenUrl;
-    private String duracion;
-    private String idioma;            // solo cine
-
-    private String artista;           // solo concierto
-    private String artistasApertura;  // solo concierto
-
-    private String festivalLineup;    // solo festival
-    private Integer festivalDias;     // solo festival
-
-    private String cineTitulo;        // solo cine
-    private String cineDirector;      // solo cine
-    private String clasificacion;     // cine
-
-    private String cineNombre;        // cine
-    private String cineSala;          // cine
-    private Integer cineAsientos;     // cine
-    private String cineHorarios;      // cine
-
-    private String recinto;           // concierto/festival
     private String ciudad;
     private String direccion;
-    private Integer capacidad;        // concierto/festival
-
     private LocalDate fecha;
+    private String descripcion;
+    private String imagenUrl;
+    private String contactoEmail;
+    
+    private String idioma;            // cine
+    private String titulopelicula;        // cine
+    private String director;      // cine
+    private String clasificacion;     // cine
+    private String sala;          // cine
+    private Integer asiento;     // cine
+    private LocalTime horarioSesion;      // cine
+    private String restriccionesEdad; //cine
+    
+    private String artista;           // concierto
+    private String artistasApertura;  // concierto
+
+    private String festivalLineup;    // festival
+    private Integer diasDuracion;     // festival
+    private LocalDate fechaFin;       // festival
+    
+    private String recinto;           // concierto/festival
+    private Integer capacidad;        // concierto/festival
     private LocalTime hora;           // concierto/festival
     private LocalTime aperturaPuertas; // concierto/festival
-    private LocalDate fechaFin;       // festival
+    private Boolean parking; // concierto/festival
+    private Boolean comida; // concierto/festival
+    
 
-    private String restriccionesEdad;
-    @Column(length = 2000)
-    private String normas;
-    private String contactoEmail;
-
-    private Boolean parking;
-    private Boolean accesible;
-    private Boolean comida;
 
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ticket> tickets = new ArrayList<>();
