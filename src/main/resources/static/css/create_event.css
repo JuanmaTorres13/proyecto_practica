@@ -137,11 +137,6 @@ body {
     gap: 2rem;
 }
 
-@media (min-width: 1200px) {
-    .create-layout {
-        grid-template-columns: 1fr 400px;
-    }
-}
 
 .form-section {
     display: flex;
