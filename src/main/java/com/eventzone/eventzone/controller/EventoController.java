@@ -1,153 +1,135 @@
 package com.eventzone.eventzone.controller;
 
-import com.eventzone.eventzone.model.Evento;
-import com.eventzone.eventzone.model.Ticket;
-import com.eventzone.eventzone.service.EventoService;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
+import com.eventzone.eventzone.model.Evento;
+import com.eventzone.eventzone.model.EventoCine;
+import com.eventzone.eventzone.model.EventoConcierto;
+import com.eventzone.eventzone.model.EventoFestival;
+import com.eventzone.eventzone.service.EventoService;
 
 @Controller
 @RequestMapping("/eventos")
 public class EventoController {
 
-    @Autowired
-    private EventoService eventoService;
+	private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
 
-    // ===== VISTAS =====
-    @GetMapping("/crear")
-    public String mostrarCrearEvento() { return "eventos/create_event"; }
+	private final EventoService eventoService;
 
-    @GetMapping("/lista")
-    public String listarEventos(org.springframework.ui.Model model) {
-        model.addAttribute("eventos", eventoService.listarTodos());
-        return "eventos/lista";
-    }
+	public EventoController(EventoService eventoService) {
+		this.eventoService = eventoService;
+	}
 
+	@GetMapping("/crear")
+	public String mostrarCrearEvento() {
+		return "eventos/create_event";
+	}
 
-    @GetMapping("/{id}")
-    public String mostrarEvento(@PathVariable Long id) { return "eventos/ver"; }
+	@GetMapping("/listar")
+	public String mostrarListasEventos() {
+		return "eventos/lista";
+	}
 
-    // ===== CRUD EVENTOS =====
-    @PostMapping("/crear")
-    @ResponseBody
-    public ResponseEntity<?> crearEvento(@RequestBody Evento evento) {
-        if (!usuarioEsAdmin()) return ResponseEntity.status(403).body("Solo administradores pueden crear eventos");
-        Evento nuevoEvento = eventoService.guardar(evento);
-        return ResponseEntity.ok(nuevoEvento);
-    }
+	@GetMapping
+	public ResponseEntity<List<Evento>> getAllEvents() {
+		return ResponseEntity.ok(eventoService.getAllEvents());
+	}
 
-    @GetMapping("/todos")
-    @ResponseBody
-    public ResponseEntity<?> listarEventos() {
-        List<Evento> eventos = eventoService.listarTodos();
-        return ResponseEntity.ok(eventos);
-    }
+//	@GetMapping("/{id}")
+//	public ResponseEntity<?> getEventbyId(@PathVariable Long id) {
+//		return eventoService.getEventbyId(id).map(ResponseEntity::ok)
+//				.orElse(ResponseEntity.status(404).body("Evento no encontrado"));
+//	}
 
-    @GetMapping("/detalle/{id}")
-    @ResponseBody
-    public ResponseEntity<?> obtenerEvento(@PathVariable Long id) {
-        Evento evento = eventoService.buscarPorId(id);
-        if (evento == null) return ResponseEntity.status(404).body("Evento no encontrado");
-        return ResponseEntity.ok(evento);
-    }
+	@PostMapping("/crear")
+	public ResponseEntity<?> createEvent(@RequestBody Evento evento) {
+		try {
+			Evento nuevo = eventoService.saveEvent(evento);
+			return ResponseEntity.ok(nuevo);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Error al crear el evento");
+		}
+	}
 
-    @PutMapping("/editar/{id}")
-    @ResponseBody
-    public ResponseEntity<?> actualizarEvento(@PathVariable Long id, @RequestBody Evento evento) {
-        if (!usuarioEsAdmin()) return ResponseEntity.status(403).body("Solo administradores pueden editar eventos");
+	@PutMapping("/modificar/{id}")
+	public ResponseEntity<?> updateEvento(@PathVariable Long id, @RequestBody Evento eventoActualizado) {
 
-        Evento existente = eventoService.buscarPorId(id);
-        if (existente == null) return ResponseEntity.status(404).body("Evento no encontrado");
+		return eventoService.getEventbyId(id).map(eventoExistente -> {
 
-        // Actualizar campos básicos
-        existente.setTipo(evento.getTipo());
-        existente.setNombre(evento.getNombre());
-        existente.setDescripcion(evento.getDescripcion());
-        existente.setGenero(evento.getGenero());
-        existente.setImagenUrl(evento.getImagenUrl());
-        existente.setDuracion(evento.getDuracion());
-        existente.setIdioma(evento.getIdioma());
-        existente.setArtista(evento.getArtista());
-        existente.setArtistasApertura(evento.getArtistasApertura());
-        existente.setFestivalLineup(evento.getFestivalLineup());
-        existente.setFestivalDias(evento.getFestivalDias());
-        existente.setCineTitulo(evento.getCineTitulo());
-        existente.setCineDirector(evento.getCineDirector());
-        existente.setClasificacion(evento.getClasificacion());
-        existente.setCineNombre(evento.getCineNombre());
-        existente.setCineSala(evento.getCineSala());
-        existente.setCineAsientos(evento.getCineAsientos());
-        existente.setCineHorarios(evento.getCineHorarios());
-        existente.setRecinto(evento.getRecinto());
-        existente.setCiudad(evento.getCiudad());
-        existente.setDireccion(evento.getDireccion());
-        existente.setCapacidad(evento.getCapacidad());
-        existente.setFecha(evento.getFecha());
-        existente.setFechaFin(evento.getFechaFin());
-        existente.setHora(evento.getHora());
-        existente.setAperturaPuertas(evento.getAperturaPuertas());
-        existente.setRestriccionesEdad(evento.getRestriccionesEdad());
-        existente.setNormas(evento.getNormas());
-        existente.setContactoEmail(evento.getContactoEmail());
-        existente.setParking(evento.getParking());
-        existente.setAccesible(evento.getAccesible());
-        existente.setComida(evento.getComida());
+			eventoExistente.setNombre(eventoActualizado.getNombre());
+			eventoExistente.setTipo(eventoActualizado.getTipo());
+			eventoExistente.setCiudad(eventoActualizado.getCiudad());
+			eventoExistente.setDireccion(eventoActualizado.getDireccion());
+			eventoExistente.setFecha(eventoActualizado.getFecha());
+			eventoExistente.setDescripcion(eventoActualizado.getDescripcion());
+			eventoExistente.setImagenUrl(eventoActualizado.getImagenUrl());
+			eventoExistente.setContactoEmail(eventoActualizado.getContactoEmail());
+			
+			eventoService.saveEvent(eventoExistente);
 
-        // Actualizar tickets asociados
-        if (evento.getTickets() != null) {
-            existente.getTickets().clear();
-            for (Ticket t : evento.getTickets()) {
-                t.setEvento(existente);
-                existente.getTickets().add(t);
-            }
-        }
+			return ResponseEntity.ok("Evento actualizado");
+		}).orElse(ResponseEntity.status(404).body("Evento no encontrado"));
+	}
 
-        eventoService.guardar(existente);
-        return ResponseEntity.ok(existente);
-    }
+	@DeleteMapping("/eliminar/{id}")
+	public ResponseEntity<?> deleteEvent(@PathVariable Long id, @RequestBody Evento evento) {
+		return eventoService.getEventbyId(id).map(e -> {
+			eventoService.deleteEvent(id);
+			return ResponseEntity.ok("Evento eliminado correctamente");
+		}).orElse(ResponseEntity.status(404).body("Evento no encontado"));
+	}
 
-    @DeleteMapping("/eliminar/{id}")
-    @ResponseBody
-    public ResponseEntity<?> eliminarEvento(@PathVariable Long id) {
-        if (!usuarioEsAdmin()) return ResponseEntity.status(403).body("Solo administradores pueden eliminar eventos");
+	@GetMapping("/cine")
+	public ResponseEntity<List<EventoCine>> getAllCines() {
+		return ResponseEntity.ok(eventoService.getAllCines());
+	}
 
-        Evento evento = eventoService.buscarPorId(id);
-        if (evento == null) return ResponseEntity.status(404).body("Evento no encontrado");
+	@PostMapping("/cine")
+	public ResponseEntity<?> createCine(@RequestBody EventoCine cine) {
+		try {
+			EventoCine nuevo = eventoService.saveCine(cine);
+			return ResponseEntity.ok(nuevo);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Error al crear el evento de cine");
+		}
+	}
 
-        eventoService.eliminar(id);
-        return ResponseEntity.ok("Evento eliminado correctamente");
-    }
+	@GetMapping("/concierto")
+	public ResponseEntity<List<EventoConcierto>> getAllConciertos() {
+		return ResponseEntity.ok(eventoService.getAllConciertos());
+	}
 
-    // ===== ESTADÍSTICAS DE TICKETS =====
-    @GetMapping("/estadisticas/{id}")
-    @ResponseBody
-    public ResponseEntity<?> estadisticasEvento(@PathVariable Long id) {
-        Evento evento = eventoService.buscarPorId(id);
-        if (evento == null) return ResponseEntity.status(404).body("Evento no encontrado");
+	@PostMapping("/concierto")
+	public ResponseEntity<?> createConcierto(@RequestBody EventoConcierto concierto) {
+		try {
+			EventoConcierto nuevo = eventoService.saveConcierto(concierto);
+			return ResponseEntity.ok(nuevo);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Error al crear el evento de concierto");
+		}
+	}
 
-        long vendidos = eventoService.totalTicketsVendidos(evento);
-        long disponibles = eventoService.totalTicketsDisponibles(evento);
-        double ingresos = eventoService.ingresosTotales(evento);
+	@GetMapping("/festival")
+	public ResponseEntity<List<EventoFestival>> getAllFestivales() {
+		return ResponseEntity.ok(eventoService.getAllFestivales());
+	}
 
-        return ResponseEntity.ok(Map.of(
-                "vendidos", vendidos,
-                "disponibles", disponibles,
-                "ingresos", ingresos
-        ));
-    }
+	@PostMapping("/festival")
+	public ResponseEntity<?> createFestival(@RequestBody EventoFestival festival) {
+		try {
+			EventoFestival nuevo = eventoService.saveFestival(festival);
+			return ResponseEntity.ok(nuevo);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Error al crear el evento de festival");
+		}
+	}
 
-    // ===== MÉTODO AUXILIAR =====
-    private boolean usuarioEsAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) return false;
-        return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-    }
 }
