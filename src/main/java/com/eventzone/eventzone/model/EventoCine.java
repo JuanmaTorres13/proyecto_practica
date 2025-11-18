@@ -16,7 +16,6 @@ public class EventoCine extends Evento {
     private String sala;         
     private Integer asientos;     
     private LocalTime horarioSesion;     
-    private String restriccionesEdad;
     
     
     public EventoCine() {
@@ -79,12 +78,5 @@ public class EventoCine extends Evento {
         this.horarioSesion = horarioSesion;
     }
     
-    public String getRestriccionesEdad() {
-        return restriccionesEdad;
-    }
-
-    public void setRestriccionesEdad(String restriccionesEdad) {
-        this.restriccionesEdad = restriccionesEdad;
-    }
 	
 }

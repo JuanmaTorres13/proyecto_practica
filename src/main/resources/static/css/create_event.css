@@ -581,3 +581,27 @@ body {
     justify-content: center;
     flex-wrap: wrap;
 }
+
+.event-type-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s, border-color 0.3s;
+    user-select: none;
+}
+
+.event-type-card.selected {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    border-color: #ec4899;
+    transform: scale(1.05);
+    color: white;
+    font-weight: bold;
+}
+
+.event-type-card input[type="radio"] {
+    display: none;
+}

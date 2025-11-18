@@ -48,7 +48,6 @@ public class TicketController {
         existente.setTipo(ticket.getTipo());
         existente.setPrecio(ticket.getPrecio());
         existente.setCantidad(ticket.getCantidad());
-        existente.setDescripcion(ticket.getDescripcion());
         existente.setVendidos(ticket.getVendidos()); // actualizado correctamente
 
         ticketService.guardar(existente);
