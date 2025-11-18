@@ -14,7 +14,6 @@ public class Ticket {
     private double precio;
     private Integer cantidad;
     private Integer vendidos = 0;
-    private String descripcion;
 
     private boolean vendido = false; 
 
@@ -37,9 +36,6 @@ public class Ticket {
 
     public Integer getVendidos() { return vendidos; }
     public void setVendidos(Integer vendidos) { this.vendidos = vendidos; }
-
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
     public boolean isVendido() { return vendido; }  
     public void setVendido(boolean vendido) { this.vendido = vendido; }

@@ -1,123 +1,103 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("eventForm");
-    const ticketContainer = document.getElementById("ticketTypes");
-    const addTicketBtn = document.getElementById("addTicketBtn");
+    const eventForm = document.getElementById("eventForm");
+    const eventTypeRadios = document.querySelectorAll('input[name="eventType"]');
 
-    // =========================
-    // Cambiar campos según tipo de evento
-    // =========================
-    document.querySelectorAll('input[name="eventType"]').forEach(radio => {
-        radio.addEventListener("change", mostrarCamposPorTipo);
+    const cineFields = document.querySelectorAll(".field-cine");
+    const conciertoFields = document.querySelectorAll(".field-concierto");
+    const festivalFields = document.querySelectorAll(".field-festival");
+
+    // Mostrar/ocultar campos según tipo
+    eventTypeRadios.forEach(radio => {
+        radio.addEventListener("change", function () {
+            const tipo = this.value;
+            cineFields.forEach(f => f.style.display = "none");
+            conciertoFields.forEach(f => f.style.display = "none");
+            festivalFields.forEach(f => f.style.display = "none");
+
+            if (tipo === "cine") cineFields.forEach(f => f.style.display = "block");
+            if (tipo === "concierto") conciertoFields.forEach(f => f.style.display = "block");
+            if (tipo === "festival") festivalFields.forEach(f => f.style.display = "block");
+        });
     });
 
-    function mostrarCamposPorTipo() {
-        const tipo = document.querySelector('input[name="eventType"]:checked').value;
+    // Tickets dinámicos
+    const addTicketBtn = document.getElementById("addTicketBtn");
+    const ticketTypesContainer = document.getElementById("ticketTypes");
 
-        document.querySelectorAll(".field-cine").forEach(el => el.style.display = tipo === "cine" ? "block" : "none");
-        document.querySelectorAll(".field-concierto").forEach(el => el.style.display = tipo === "concierto" ? "block" : "none");
-        document.querySelectorAll(".field-festival").forEach(el => el.style.display = tipo === "festival" ? "block" : "none");
-
-        // Mostrar opciones de género según tipo
-        document.querySelectorAll("#eventGenre option").forEach(opt => {
-            opt.style.display = (opt.classList.contains(`genre-${tipo}`)) ? "block" : "none";
-        });
-    }
-
-    // =========================
-    // Añadir/Eliminar tickets dinámicamente
-    // =========================
-    addTicketBtn.addEventListener("click", () => {
-        const newTicket = ticketContainer.querySelector(".ticket-type-item").cloneNode(true);
+    addTicketBtn.addEventListener("click", function () {
+        const newTicket = ticketTypesContainer.firstElementChild.cloneNode(true);
         newTicket.querySelectorAll("input").forEach(input => input.value = "");
-        newTicket.querySelector(".btn-remove-ticket").style.display = "inline-block";
-        ticketContainer.appendChild(newTicket);
-
-        // Añadir evento al botón eliminar
-        newTicket.querySelector(".btn-remove-ticket").addEventListener("click", () => {
+        const removeBtn = newTicket.querySelector(".btn-remove-ticket");
+        removeBtn.style.display = "inline-block";
+        removeBtn.addEventListener("click", function () {
             newTicket.remove();
         });
+        ticketTypesContainer.appendChild(newTicket);
     });
 
-    ticketContainer.querySelectorAll(".btn-remove-ticket").forEach(btn => {
-        btn.addEventListener("click", e => {
-            e.target.closest(".ticket-type-item").remove();
-        });
-    });
-
-    // =========================
-    // Capturar submit del formulario
-    // =========================
-    form.addEventListener("submit", function (e) {
+    // Enviar datos al backend
+    eventForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        const eventoData = recolectarDatosEvento();
-        enviarEvento(eventoData);
-    });
+        const tipoEvento = document.querySelector('input[name="eventType"]:checked')?.value;
+        if (!tipoEvento) {
+            alert("Selecciona un tipo de evento");
+            return;
+        }
 
-    // =========================
-    // Construir objeto Evento
-    // =========================
-    function recolectarDatosEvento() {
-        const tipo = document.querySelector('input[name="eventType"]:checked')?.value;
-        const tickets = [];
-
-        document.querySelectorAll("#ticketTypes .ticket-type-item").forEach(item => {
-            tickets.push({
-                tipo: item.querySelector('input[name="ticketTypeName[]"]').value,
-                precio: parseFloat(item.querySelector('input[name="ticketTypePrice[]"]').value),
-                cantidad: parseInt(item.querySelector('input[name="ticketTypeQuantity[]"]').value),
-                descripcion: item.querySelector('input[name="ticketTypeDescription[]"]').value
-            });
-        });
-
-        return {
-            tipo: tipo,
+        // Construir objeto base
+        const eventData = {
+            tipo: tipoEvento,
             nombre: document.getElementById("eventName").value,
             descripcion: document.getElementById("eventDescription").value,
-            genero: document.getElementById("eventGenre").value,
-            imagenUrl: document.getElementById("eventImage").value,
-            duracion: document.getElementById("eventDuration").value,
-            fecha: document.getElementById("eventDate").value,
-            fechaFin: document.getElementById("eventEndDate")?.value || null,
-            hora: document.getElementById("eventTime")?.value || null,
-            aperturaPuertas: document.getElementById("eventDoors")?.value || null,
             ciudad: document.getElementById("eventCity").value,
             direccion: document.getElementById("eventAddress").value,
-            capacidad: parseInt(document.getElementById("eventCapacity")?.value) || null,
+            fecha: document.getElementById("eventDate").value,
+            imagenUrl: document.getElementById("imagenUrl").file[0],
             contactoEmail: document.getElementById("eventContact").value,
-            restriccionesEdad: document.getElementById("eventRestrictions").value,
-            normas: document.getElementById("eventRules").value,
-            parking: document.getElementById("eventParking").checked,
-            accesible: document.getElementById("eventAccessible").checked,
-            comida: document.getElementById("eventFood").checked,
-            // Campos específicos por tipo
-            cineTitulo: tipo === "cine" ? document.getElementById("movieTitle").value : null,
-            cineDirector: tipo === "cine" ? document.getElementById("movieDirector").value : null,
-            cineNombre: tipo === "cine" ? document.getElementById("cinemaName").value : null,
-            cineSala: tipo === "cine" ? document.getElementById("cinemaRoom").value : null,
-            cineAsientos: tipo === "cine" ? parseInt(document.getElementById("cinemaSeats").value) : null,
-            cineHorarios: tipo === "cine" ? document.getElementById("cinemaShowtimes").value : null,
-            cineIdioma: tipo === "cine" ? document.getElementById("movieLanguage")?.value : null,
-
-            artista: tipo === "concierto" ? document.getElementById("artistName").value : null,
-            artistasApertura: tipo === "concierto" ? document.getElementById("supportActs").value : null,
-            recinto: (tipo === "concierto" || tipo === "festival") ? document.getElementById("eventVenue")?.value : null,
-
-            festivalLineup: tipo === "festival" ? document.getElementById("festivalLineup")?.value : null,
-            festivalDias: tipo === "festival" ? parseInt(document.getElementById("festivalDays")?.value) : null,
-
-            tickets: tickets
+            tickets: Array.from(ticketTypesContainer.children).map(ticket => ({
+                nombre: ticket.querySelector('input[name="ticketTypeName[]"]').value,
+                precio: parseFloat(ticket.querySelector('input[name="ticketTypePrice[]"]').value),
+                cantidad: parseInt(ticket.querySelector('input[name="ticketTypeQuantity[]"]').value)
+            }))
         };
-    }
 
-    // =========================
-    // Enviar evento con AJAX
-    // =========================
-    function enviarEvento(evento) {
+        // Campos específicos
+        if (tipoEvento === "cine") {a
+            eventData.tituloPelicula = document.getElementById("movieTitle").value;
+            eventData.director = document.getElementById("movieDirector").value;
+            eventData.clasificacion = document.getElementById("movieRating").value;
+            eventData.idioma = document.getElementById("movieLanguage").value;
+        }
+
+        if (tipoEvento === "concierto") {
+            eventData.artista = document.getElementById("artistName").value;
+            eventData.artistasApertura = document.getElementById("supportActs").value;
+            eventData.recinto = document.getElementById("eventVenue").value;
+            eventData.capacidad = parseInt(document.getElementById("eventCapacity").value) || 0;
+            eventData.horaComienzo = document.getElementById("eventTime").value;
+            eventData.aperturaPuertas = document.getElementById("eventDoors").value;
+            eventData.parking = document.getElementById("eventParking").checked;
+        }
+
+        if (tipoEvento === "festival") {
+            eventData.cartelArtistas = document.getElementById("festivalLineup").value;
+            eventData.diasDuracion = parseInt(document.getElementById("festivalDays").value) || 0;
+            eventData.fechaFin = document.getElementById("eventEndDate").value;
+            eventData.recinto = document.getElementById("eventVenue").value;
+            eventData.capacidad = parseInt(document.getElementById("eventCapacity").value) || 0;
+            eventData.horaComienzo = document.getElementById("eventTime").value;
+            eventData.aperturaPuertas = document.getElementById("eventDoors").value;
+            eventData.parking = document.getElementById("eventParking").checked;
+        }
+
+        // Enviar via fetch al backend (Spring Boot REST)
         fetch("/eventos/crear", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(evento)
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(eventData)
         })
         .then(response => {
             if (!response.ok) throw new Error("Error al crear el evento");
@@ -125,19 +105,22 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(data => {
             Swal.fire({
-                icon: "success",
-                title: "¡Evento creado!",
-                text: "Tu evento se ha publicado correctamente."
+                icon: 'success',
+                title: 'Evento creado',
+                text: '¡El evento se ha publicado correctamente!'
             });
-            form.reset();
+            eventForm.reset();
+            cineFields.forEach(f => f.style.display = "none");
+            conciertoFields.forEach(f => f.style.display = "none");
+            festivalFields.forEach(f => f.style.display = "none");
+            while (ticketTypesContainer.children.length > 1) ticketTypesContainer.lastChild.remove();
         })
         .catch(error => {
-            console.error(error);
             Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "No se pudo crear el evento."
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo crear el evento. ' + error.message
             });
         });
-    }
+    });
 });
