@@ -365,3 +365,100 @@ body {
   background-color: #c0392b;
   transform: scale(1.05);
 }
+
+.ticket-card {
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ticket-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ticket-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Imagen tipo avatar */
+.ticket-avatar-section {
+    flex-shrink: 0;
+}
+
+.ticket-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(147, 51, 234, 0.5);
+}
+
+/* Detalles del evento */
+.ticket-details h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.ticket-details p {
+    margin: 0.1rem 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Botones estilo usuarios */
+.ticket-actions {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.ticket-actions .btn-delete-user {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.ticket-actions .btn-delete-user:hover {
+    background-color: #c0392b;
+    transform: scale(1.05);
+}
+
+.ticket-actions .btn-edit {
+    background-color: #3498db;
+}
+
+.ticket-actions .btn-edit:hover {
+    background-color: #2980b9;
+}
+
+/* Badge general */
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+}
+
+/* Colores según tipo */
+.badge-cine { background-color: #3498db; }       /* Azul */
+.badge-concierto { background-color: #2ecc71; }  /* Verde */
+.badge-festival { background-color: #e67e22; }   /* Naranja */
+.badge-default { background-color: #95a5a6; }    /* Gris */
+
