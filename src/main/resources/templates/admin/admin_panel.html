@@ -37,7 +37,7 @@
                 <button class="menu-item active" data-tab="tab-crear-evento">
                     <span class="menu-icon">🎫</span> Crear Evento
                 </button>
-                <button class="menu-item" data-tab="tab-lista-eventos">
+                <button class="menu-item" data-tab="tab-lista-eventos" onclick=cargarEventos()>
                     <span class="menu-icon">📅</span> Lista de Eventos
                 </button>
                 <button class="menu-item" data-tab="tab-usuarios">
@@ -95,7 +95,7 @@
 
                                         <div class="form-group full-width">
                                             <label>URL de Imagen *</label>
-                                            <input type="file" accept="image/png, image/jpeg, image/jpg, image/gif" id="imagenUrl" name="imagenUrl" required>
+                                            <input type="file" accept="image/png, image/jpeg, image/jpg, image/gif" id="imagenFile" name="imagenFile" required>
                                         </div>
 
                                         <!-- Campos CINE -->
