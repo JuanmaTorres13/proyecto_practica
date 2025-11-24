@@ -13,7 +13,7 @@ public class EventoCine extends Evento {
     private String tituloPelicula;    
     private String director;
     private String clasificacion;
-    private String sala;         
+    private String sala;
     private Integer asientos;     
     private LocalTime horarioSesion;     
     

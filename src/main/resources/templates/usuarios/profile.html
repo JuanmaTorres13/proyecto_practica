@@ -37,6 +37,10 @@
 						<button class="menu-item active" data-tab="profile">
 							<span class="menu-icon">👤</span> <span>Mi Perfil</span>
 						</button>
+						<button class="menu-item" data-tab="availableEvents">
+							<span class="menu-icon">📢</span> <span>Eventos
+								Disponibles</span>
+						</button>
 						<button class="menu-item" data-tab="tickets">
 							<span class="menu-icon">🎫</span> <span>Mis Entradas</span>
 						</button>
@@ -123,6 +127,16 @@
 							</div>
 						</div>
 					</div>
+				</div>
+				<div class="tab-content" id="availableEventsTab">
+					<h2 class="section-title">Eventos Disponibles</h2>
+
+					<!-- Contenedor donde se cargarán los eventos dinámicamente -->
+					<div class="tickets-list" id="availableEventsList"></div>
+
+					<!-- Mensaje cuando no hay eventos -->
+					<p class="no-events" id="noAvailableEvents" style="display: none;">
+						No hay eventos disponibles actualmente.</p>
 				</div>
 
 				<div class="tab-content" id="ticketsTab">

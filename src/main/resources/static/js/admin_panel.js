@@ -121,7 +121,7 @@ async function cargarEventos() {
     if (!cont) return;
 
     try {
-        const res = await fetch("/eventos");
+        const res = await fetch("/eventos/disponibles");
         if (!res.ok) throw new Error("No se pudieron obtener los eventos");
         const eventos = await res.json();
 
@@ -148,10 +148,10 @@ async function cargarEventos() {
                     <div class="ticket-details">
                         <div class="ticket-header">
                             <h3>${e.nombre}</h3>
-                            <span class="badge ${badgeClass}">${badgeText}</span>
+                            <span class="badge ${badgeClass}">${badgeText.toUpperCase()}</span>
                         </div>
-                        <p>Fecha: ${e.fecha}${e.hora ? " " + e.hora : ""}</p>
-                        <p>Ciudad: ${e.ciudad || ''}${e.direccion ? ", " + e.direccion : ''}</p>
+                        <p>Fecha: ${e.fecha}</p>
+                        <p>📍 ${e.ciudad || ''}${e.direccion ? ", " + e.direccion : ''}</p>
                     </div>
                     <div class="ticket-actions">
                         <button class="btn-delete-user btn-edit">✏️ Editar</button>
