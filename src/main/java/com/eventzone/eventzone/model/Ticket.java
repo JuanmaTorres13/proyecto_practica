@@ -1,6 +1,8 @@
 	package com.eventzone.eventzone.model;
 	
-	import jakarta.persistence.*;
+	import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.*;
 	
 	@Entity
 	@Table(name = "tickets")
@@ -19,6 +21,7 @@
 	
 	    @ManyToOne
 	    @JoinColumn(name = "evento_id")
+	    @JsonBackReference
 	    private Evento evento;
 	
 	    // ===== Getters y Setters =====

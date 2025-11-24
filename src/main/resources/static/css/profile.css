@@ -431,7 +431,7 @@ body {
 }
 
 .detail-item.price {
-    color: #ec4899;
+    color:rgba(255, 255, 255, 0.7);
     font-weight: 600;
 }
 

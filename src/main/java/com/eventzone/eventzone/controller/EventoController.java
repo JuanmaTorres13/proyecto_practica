@@ -32,7 +32,7 @@ public class EventoController {
     @Autowired
     private ImagenService imagenService;  
     
-    @GetMapping
+    @GetMapping("/disponibles")
     public ResponseEntity<List<Evento>> getAllEvents() {
         return ResponseEntity.ok(eventoService.getAllEvents());
     }
@@ -55,54 +55,6 @@ public class EventoController {
             return ResponseEntity.status(404).body("Evento no encontrado");
         }
         return ResponseEntity.ok(eventoOpt.get());
-    }
-
-    
-    @PutMapping("/editar/{id}")
-    public ResponseEntity<?> updateCine(
-            @PathVariable Long id,
-            @RequestParam("nombre") String nombre,
-            @RequestParam("descripcion") String descripcion,
-            @RequestParam("ciudad") String ciudad,
-            @RequestParam("direccion") String direccion,
-            @RequestParam("fecha") String fechaStr,
-            @RequestParam("contactoEmail") String contactoEmail,
-            @RequestParam(value = "imagenFile", required = false) MultipartFile imagen,
-            @RequestParam(required = false) String tituloPelicula,
-            @RequestParam(required = false) String director,
-            @RequestParam(required = false) String clasificacion,
-            @RequestParam(required = false) String idioma
-    ) {
-        try {
-            EventoCine cine = (EventoCine) eventoService.getEventbyId(id).orElse(null);
-            if (cine == null) return ResponseEntity.status(404).body("Evento no encontrado");
-
-            cine.setNombre(nombre);
-            cine.setDescripcion(descripcion);
-            cine.setCiudad(ciudad);
-            cine.setDireccion(direccion);
-            cine.setFecha(LocalDate.parse(fechaStr));
-            cine.setContactoEmail(contactoEmail);
-            cine.setCineTitulo(tituloPelicula);
-            cine.setCineDirector(director);
-            cine.setClasificacion(clasificacion);
-            cine.setIdioma(idioma);
-
-            // Si cambia imagen
-            if (imagen != null && !imagen.isEmpty()) {
-                String imagesDir = "src/main/resources/static/images/";
-                String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
-                Path path = Paths.get(imagesDir + nombreArchivo);
-                Files.copy(imagen.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                cine.setImagenUrl("/images/" + nombreArchivo);
-            }
-
-            EventoCine actualizado = eventoService.saveCine(cine);
-            return ResponseEntity.ok(actualizado);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al editar el evento");
-        }
     }
 
 

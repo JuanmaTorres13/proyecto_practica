@@ -104,6 +104,9 @@ document.addEventListener("DOMContentLoaded", function() {
 				formData.append("director", document.getElementById("movieDirector").value);
 				formData.append("clasificacion", document.getElementById("movieRating").value);
 				formData.append("idioma", document.getElementById("movieLanguage").value);
+				formData.append("sala", document.getElementById("movieSala").value);
+				formData.append("asientos", document.getElementById("movieAsientos").value);
+				formData.append("horarioSesionStr", document.getElementById("movieHorario").value);
 			} else if (tipoEvento === "concierto") {
 				url = "/eventos/concierto/crear";
 				formData.append("artista", document.getElementById("artistName").value);
@@ -124,6 +127,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				formData.append("aperturaPuertasStr", document.getElementById("puertasFestival").value);
 				formData.append("parking", document.getElementById("parkingFestival").checked);
 			}
+			
+			console.log(formData);
 
 
 			fetch(url, { method: "POST", body: formData })

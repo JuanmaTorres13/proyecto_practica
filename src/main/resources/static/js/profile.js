@@ -27,12 +27,12 @@ let originalData = {};
 
 /* ====== INICIALIZACIÓN ====== */
 window.addEventListener('DOMContentLoaded', () => {
-    navTab();
-    editarPerfil();
-    guardarCambios();
-    cancelarEdit();
-    favoritos();
-    logout();
+	navTab();
+	editarPerfil();
+	guardarCambios();
+	cancelarEdit();
+	favoritos();
+	logout();
 });
 
 cargarPerfil();
@@ -46,35 +46,132 @@ cargarPerfil();
  * @function cargarPerfil
  */
 async function cargarPerfil() {
-    try {
-        const res = await fetch("/usuarios/me", {
-            method: "GET",
-            credentials: "include"
-        });
+	try {
+		const res = await fetch("/usuarios/me", {
+			method: "GET",
+			credentials: "include"
+		});
 
-        if (!res.ok) throw new Error("No autenticado");
+		if (!res.ok) throw new Error("No autenticado");
 
-        const data = await res.json();
+		const data = await res.json();
 
-        // Cargar datos en los campos
-        nombreInput.value = data.nombre;
-        emailInput.value = data.email;
-        telefonoInput.value = data.telefono || '';
-        ciudadInput.value = data.ciudad || '';
-        bioTextarea.value = data.bio || '';
-        fechaNacimientoInput.value = data.fechaNacimiento || '';
+		// Cargar datos en los campos
+		nombreInput.value = data.nombre;
+		emailInput.value = data.email;
+		telefonoInput.value = data.telefono || '';
+		ciudadInput.value = data.ciudad || '';
+		bioTextarea.value = data.bio || '';
+		fechaNacimientoInput.value = data.fechaNacimiento || '';
 
-        // Actualizar barra lateral
-        document.getElementById('userName').textContent = data.nombre;
-        document.getElementById('userEmail').textContent = data.email;
-        const initials = data.nombre.split(' ').map(n => n[0]).join('').toUpperCase();
-        document.getElementById('userAvatar').textContent = initials;
+		// Actualizar barra lateral
+		document.getElementById('userName').textContent = data.nombre;
+		document.getElementById('userEmail').textContent = data.email;
+		const initials = data.nombre.split(' ').map(n => n[0]).join('').toUpperCase();
+		document.getElementById('userAvatar').textContent = initials;
 
-    } catch (error) {
-        console.error(error);
-        window.location.href = "/usuarios/login";
-    }
+	} catch (error) {
+		console.error(error);
+		window.location.href = "/usuarios/login";
+	}
 }
+
+/* =========================================================
+   CARGA DINÁMICA DE EVENTOS DISPONIBLES
+   ========================================================= */
+window.addEventListener('DOMContentLoaded', () => {
+	cargarEventosDisponibles();
+});
+
+/**
+ * Obtiene los eventos disponibles desde el servidor y los renderiza en la pestaña correspondiente.
+ * @async
+ * @function cargarEventosDisponibles
+ */
+async function cargarEventosDisponibles() {
+	const eventsContainer = document.getElementById('availableEventsList');
+	const noEventsMsg = document.getElementById('noAvailableEvents');
+
+	try {
+		const res = await fetch('/eventos/disponibles', {
+			method: 'GET',
+			credentials: 'include'
+		});
+
+		if (!res.ok) throw new Error('Error al obtener eventos');
+
+		const eventos = await res.json();
+
+		// Limpiar contenedor
+		eventsContainer.innerHTML = '';
+
+		if (!eventos || eventos.length === 0) {
+			noEventsMsg.style.display = 'block';
+			return;
+		} else {
+			noEventsMsg.style.display = 'none';
+		}
+
+		// Crear tarjetas de eventos
+		eventos.forEach(evento => {
+			const card = document.createElement('div');
+			card.classList.add('ticket-card');
+
+			card.innerHTML = `
+                <img src="${evento.imagenUrl}" alt="${evento.nombre}" class="ticket-image">
+
+                <div class="ticket-info">
+                    <div class="ticket-header">
+                        <h3>${evento.nombre}</h3>
+                        <span class="badge badge-success">Disponible</span>
+                    </div>
+
+                    <div class="ticket-details">
+                        <p class="detail-item">
+                            <span class="detail-icon">📅</span> ${evento.fecha}
+                        </p>
+                        <p class="detail-item">
+                            <span class="detail-icon">📍</span> ${evento.ciudad}, ${evento.direccion}
+                        </p>
+						<p class="detail-item price">
+						    <span class="detail-icon">💳</span>
+						    ${evento.tickets && evento.tickets.length > 0
+					? evento.tickets.map(t => `${t.tipo}: ${t.precio} €`).join(' | ')
+					: 'No hay tickets'}
+						</p>
+
+                    </div>
+
+                    <div class="ticket-actions">
+                        <a href="/eventos/${evento.id}" class="btn-primary">Ver detalles</a>
+                        <a href="/eventos/comprar/${evento.id}" class="btn-secondary">Comprar</a>
+                    </div>
+                </div>
+            `;
+
+			eventsContainer.appendChild(card);
+		});
+
+		// Animación de entrada
+		const cards = eventsContainer.querySelectorAll('.ticket-card');
+		cards.forEach((card, index) => {
+			card.style.opacity = '0';
+			card.style.transform = 'translateY(20px)';
+			card.style.transition = 'all 0.5s ease';
+
+			setTimeout(() => {
+				card.style.opacity = '1';
+				card.style.transform = 'translateY(0)';
+			}, 50 + (index * 100));
+		});
+
+	} catch (error) {
+		console.error('Error cargando eventos disponibles:', error);
+		noEventsMsg.textContent = 'No se pudieron cargar los eventos.';
+		noEventsMsg.style.display = 'block';
+	}
+}
+
 
 /* =========================================================
    NAVEGACIÓN ENTRE PESTAÑAS
@@ -84,18 +181,18 @@ async function cargarPerfil() {
  * @function navTab
  */
 function navTab() {
-    menuItems.forEach(item => {
-        item.addEventListener('click', () => {
-            menuItems.forEach(mi => mi.classList.remove('active'));
-            item.classList.add('active');
+	menuItems.forEach(item => {
+		item.addEventListener('click', () => {
+			menuItems.forEach(mi => mi.classList.remove('active'));
+			item.classList.add('active');
 
-            const tabName = item.getAttribute('data-tab');
-            tabContents.forEach(tc => tc.classList.remove('active'));
+			const tabName = item.getAttribute('data-tab');
+			tabContents.forEach(tc => tc.classList.remove('active'));
 
-            const selectedTab = document.getElementById(tabName + 'Tab');
-            if (selectedTab) selectedTab.classList.add('active');
-        });
-    });
+			const selectedTab = document.getElementById(tabName + 'Tab');
+			if (selectedTab) selectedTab.classList.add('active');
+		});
+	});
 }
 
 /* =========================================================
@@ -106,23 +203,23 @@ function navTab() {
  * @function editarPerfil
  */
 function editarPerfil() {
-    editBtn.addEventListener('click', () => {
-        originalData = {
-            nombre: nombreInput.value,
-            email: emailInput.value,
-            telefono: telefonoInput.value,
-            ciudad: ciudadInput.value,
-            fechaNacimiento: fechaNacimientoInput.value,
-            bio: bioTextarea.value
-        };
+	editBtn.addEventListener('click', () => {
+		originalData = {
+			nombre: nombreInput.value,
+			email: emailInput.value,
+			telefono: telefonoInput.value,
+			ciudad: ciudadInput.value,
+			fechaNacimiento: fechaNacimientoInput.value,
+			bio: bioTextarea.value
+		};
 
-        [nombreInput, emailInput, telefonoInput, ciudadInput, fechaNacimientoInput, bioTextarea]
-            .forEach(el => el.removeAttribute('readonly'));
+		[nombreInput, emailInput, telefonoInput, ciudadInput, fechaNacimientoInput, bioTextarea]
+			.forEach(el => el.removeAttribute('readonly'));
 
-        nombreInput.focus();
-        editBtn.style.display = 'none';
-        editActions.style.display = 'flex';
-    });
+		nombreInput.focus();
+		editBtn.style.display = 'none';
+		editActions.style.display = 'flex';
+	});
 }
 
 /* =========================================================
@@ -134,55 +231,55 @@ function editarPerfil() {
  * @function guardarCambios
  */
 function guardarCambios() {
-    saveBtn.addEventListener('click', async () => {
-        const payload = {
-            nombre: nombreInput.value,
-            email: emailInput.value,
-            telefono: telefonoInput.value,
-            ciudad: ciudadInput.value,
-            bio: bioTextarea.value,
-            fechaNacimiento: fechaNacimientoInput.value
-        };
+	saveBtn.addEventListener('click', async () => {
+		const payload = {
+			nombre: nombreInput.value,
+			email: emailInput.value,
+			telefono: telefonoInput.value,
+			ciudad: ciudadInput.value,
+			bio: bioTextarea.value,
+			fechaNacimiento: fechaNacimientoInput.value
+		};
 
-        try {
-            const res = await fetch("/usuarios/me", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify(payload)
-            });
+		try {
+			const res = await fetch("/usuarios/me", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify(payload)
+			});
 
-            if (!res.ok) throw new Error("Error al actualizar perfil");
+			if (!res.ok) throw new Error("Error al actualizar perfil");
 
-            // Actualizar vista
-            document.getElementById('userName').textContent = nombreInput.value;
-            document.getElementById('userEmail').textContent = emailInput.value;
-            const initials = nombreInput.value.split(' ').map(n => n[0]).join('').toUpperCase();
-            document.getElementById('userAvatar').textContent = initials;
+			// Actualizar vista
+			document.getElementById('userName').textContent = nombreInput.value;
+			document.getElementById('userEmail').textContent = emailInput.value;
+			const initials = nombreInput.value.split(' ').map(n => n[0]).join('').toUpperCase();
+			document.getElementById('userAvatar').textContent = initials;
 
-            // Restaurar interfaz
-            [nombreInput, emailInput, telefonoInput, ciudadInput, fechaNacimientoInput, bioTextarea]
-                .forEach(el => el.setAttribute('readonly', true));
-            editBtn.style.display = 'flex';
-            editActions.style.display = 'none';
+			// Restaurar interfaz
+			[nombreInput, emailInput, telefonoInput, ciudadInput, fechaNacimientoInput, bioTextarea]
+				.forEach(el => el.setAttribute('readonly', true));
+			editBtn.style.display = 'flex';
+			editActions.style.display = 'none';
 
-            // Alerta de éxito
-            Swal.fire({
-                icon: 'success',
-                title: '¡Perfil actualizado!',
-                showConfirmButton: false,
-                timer: 2000
-            });
+			// Alerta de éxito
+			Swal.fire({
+				icon: 'success',
+				title: '¡Perfil actualizado!',
+				showConfirmButton: false,
+				timer: 2000
+			});
 
-        } catch (error) {
-            console.error(error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error al guardar cambios',
-                text: error.message
-            });
-        }
-    });
+		} catch (error) {
+			console.error(error);
+			Swal.fire({
+				icon: 'error',
+				title: 'Error al guardar cambios',
+				text: error.message
+			});
+		}
+	});
 }
 
 /* =========================================================
@@ -193,27 +290,27 @@ function guardarCambios() {
  * @function cancelarEdit
  */
 function cancelarEdit() {
-    cancelBtn.addEventListener('click', () => {
-        nombreInput.value = originalData.nombre;
-        emailInput.value = originalData.email;
-        telefonoInput.value = originalData.telefono;
-        ciudadInput.value = originalData.ciudad;
-        fechaNacimientoInput.value = originalData.fechaNacimiento;
-        bioTextarea.value = originalData.bio;
+	cancelBtn.addEventListener('click', () => {
+		nombreInput.value = originalData.nombre;
+		emailInput.value = originalData.email;
+		telefonoInput.value = originalData.telefono;
+		ciudadInput.value = originalData.ciudad;
+		fechaNacimientoInput.value = originalData.fechaNacimiento;
+		bioTextarea.value = originalData.bio;
 
-        [nombreInput, emailInput, telefonoInput, ciudadInput, fechaNacimientoInput, bioTextarea]
-            .forEach(el => el.setAttribute('readonly', true));
+		[nombreInput, emailInput, telefonoInput, ciudadInput, fechaNacimientoInput, bioTextarea]
+			.forEach(el => el.setAttribute('readonly', true));
 
-        editBtn.style.display = 'flex';
-        editActions.style.display = 'none';
+		editBtn.style.display = 'flex';
+		editActions.style.display = 'none';
 
-        Swal.fire({
-            icon: 'info',
-            title: 'Edición cancelada',
-            showConfirmButton: false,
-            timer: 1500
-        });
-    });
+		Swal.fire({
+			icon: 'info',
+			title: 'Edición cancelada',
+			showConfirmButton: false,
+			timer: 1500
+		});
+	});
 }
 
 /* =========================================================
@@ -224,36 +321,36 @@ function cancelarEdit() {
  * @function favoritos
  */
 function favoritos() {
-    document.querySelectorAll('.btn-remove').forEach(btn => {
-        btn.addEventListener('click', function() {
-            Swal.fire({
-                title: '¿Desea eliminar este evento de favoritos?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const card = this.closest('.favorite-card');
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.9)';
-                    card.style.transition = 'all 0.3s';
-                    setTimeout(() => {
-                        card.remove();
-                        const favCount = document.getElementById('favoritesCount');
-                        favCount.textContent = parseInt(favCount.textContent) - 1;
-                    }, 300);
+	document.querySelectorAll('.btn-remove').forEach(btn => {
+		btn.addEventListener('click', function() {
+			Swal.fire({
+				title: '¿Desea eliminar este evento de favoritos?',
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonText: 'Sí, eliminar',
+				cancelButtonText: 'Cancelar'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					const card = this.closest('.favorite-card');
+					card.style.opacity = '0';
+					card.style.transform = 'scale(0.9)';
+					card.style.transition = 'all 0.3s';
+					setTimeout(() => {
+						card.remove();
+						const favCount = document.getElementById('favoritesCount');
+						favCount.textContent = parseInt(favCount.textContent) - 1;
+					}, 300);
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Evento eliminado',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                }
-            });
-        });
-    });
+					Swal.fire({
+						icon: 'success',
+						title: 'Evento eliminado',
+						showConfirmButton: false,
+						timer: 1500
+					});
+				}
+			});
+		});
+	});
 }
 
 /* =========================================================
@@ -264,19 +361,19 @@ function favoritos() {
  * @function logout
  */
 function logout() {
-    document.querySelector('.logout-btn').addEventListener('click', () => {
-        Swal.fire({
-            title: '¿Desea cerrar sesión?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, salir',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '/usuarios/login';
-            }
-        });
-    });
+	document.querySelector('.logout-btn').addEventListener('click', () => {
+		Swal.fire({
+			title: '¿Desea cerrar sesión?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Sí, salir',
+			cancelButtonText: 'Cancelar'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				window.location.href = '/usuarios/login';
+			}
+		});
+	});
 }
 
 /* =========================================================
@@ -287,15 +384,15 @@ function logout() {
  * @function animaciones
  */
 window.addEventListener('load', () => {
-    const cards = document.querySelectorAll('.ticket-card, .favorite-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'all 0.5s ease';
+	const cards = document.querySelectorAll('.ticket-card, .favorite-card');
+	cards.forEach((card, index) => {
+		card.style.opacity = '0';
+		card.style.transform = 'translateY(20px)';
+		card.style.transition = 'all 0.5s ease';
 
-        setTimeout(() => {
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, 50 + (index * 100));
-    });
+		setTimeout(() => {
+			card.style.opacity = '1';
+			card.style.transform = 'translateY(0)';
+		}, 50 + (index * 100));
+	});
 });
