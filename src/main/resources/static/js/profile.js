@@ -112,6 +112,21 @@ async function cargarEventosDisponibles() {
 			noEventsMsg.style.display = 'none';
 		}
 
+		function formatFecha(fechaStr) {
+			if (!fechaStr) return '';
+			const fecha = new Date(fechaStr);
+			const meses = [
+				"Ene", "Feb", "Mar", "Abr", "May", "Jun",
+				"Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+			];
+			const day = String(fecha.getDate()).padStart(2, '0');
+			const month = meses[fecha.getMonth()];
+			const year = fecha.getFullYear();
+
+			return `${day}-${month}-${year}`;
+		}
+
+
 		// Crear tarjetas de eventos
 		eventos.forEach(evento => {
 			const card = document.createElement('div');
@@ -127,9 +142,14 @@ async function cargarEventosDisponibles() {
                     </div>
 
                     <div class="ticket-details">
-                        <p class="detail-item">
-                            <span class="detail-icon">📅</span> ${evento.fecha}
-                        </p>
+					<p class="detail-item">
+					    <span class="detail-icon">📅</span>
+					    ${evento.fechaFin && evento.fechaFin !== evento.fecha
+					? `${formatFecha(evento.fecha)} - ${formatFecha(evento.fechaFin)}`
+					: formatFecha(evento.fecha)
+				}
+					</p>
+
                         <p class="detail-item">
                             <span class="detail-icon">📍</span> ${evento.ciudad}, ${evento.direccion}
                         </p>
