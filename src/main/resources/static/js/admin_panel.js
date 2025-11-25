@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	initTabs();
 	initLogout();
 	cargarUsuarios();
+	cargarEventos();
 });
 
 /**
@@ -145,7 +146,6 @@ async function cargarEventos() {
 		}
 
 		cont.innerHTML = eventos.map(e => {
-			// Determinar clase y texto del badge según tipo
 			let badgeClass = "badge-default";
 			let badgeText = e.tipo || "Evento";
 
@@ -154,7 +154,7 @@ async function cargarEventos() {
 			else if (badgeText.toLowerCase() === "festival") badgeClass = "badge-festival";
 
 			return `
-            <div class="ticket-card" data-id="${e.id}">
+            <div class="ticket-card" data-id="${e.id}" data-tipo="${e.tipo}">
                 <div class="ticket-info">
                     <div class="ticket-avatar-section">
                         <img src="${e.imagenUrl || '/images/default-event.jpg'}" alt="${e.nombre}" class="ticket-avatar">
@@ -164,12 +164,7 @@ async function cargarEventos() {
                             <h3>${e.nombre}</h3>
                             <span class="badge ${badgeClass}">${badgeText.toUpperCase()}</span>
                         </div>
-                        <p>Fecha: 
-							    ${e.fechaFin && e.fechaFin !== e.fecha
-					? `${formatFecha(e.fecha)} - ${formatFecha(e.fechaFin)}`
-					: formatFecha(e.fecha)
-				}
-						</p>
+                        <p>Fecha: ${e.fechaFin && e.fechaFin !== e.fecha ? `${formatFecha(e.fecha)} - ${formatFecha(e.fechaFin)}` : formatFecha(e.fecha)}</p>
                         <p>📍 ${e.ciudad || ''}${e.direccion ? ", " + e.direccion : ''}</p>
                     </div>
                     <div class="ticket-actions">
@@ -180,7 +175,7 @@ async function cargarEventos() {
             </div>`;
 		}).join("");
 
-		// Botones eliminar
+		// Eliminar evento
 		cont.querySelectorAll(".btn-delete").forEach(btn => {
 			btn.addEventListener("click", async () => {
 				const card = btn.closest(".ticket-card");
@@ -209,26 +204,49 @@ async function cargarEventos() {
 			});
 		});
 
-		// Aquí puedes agregar funcionalidad de "Editar"
+		// Editar evento
+		cont.querySelectorAll(".btn-edit").forEach(btn => {
+			btn.addEventListener("click", async () => {
+				const card = btn.closest(".ticket-card");
+				const id = card.dataset.id;
+				const tipo = card.dataset.tipo;
+				if (!id) return;
+
+				try {
+					const res = await fetch(`/eventos/${id}`);
+					if (!res.ok) throw new Error(await res.text());
+					const evento = await res.json();
+					llenarFormularioEvento(evento);
+
+					const editTab = document.querySelector('.menu-item[data-tab="tab-crear-evento"]');
+					if (editTab) editTab.click();
+
+					// Guardar ID de evento en el formulario para editar
+					const form = document.getElementById("formEvento");
+					form.dataset.eventoId = id;
+
+				} catch (err) {
+					console.error(err);
+					Swal.fire({ icon: "error", title: "No se pudo cargar evento", text: err.message });
+				}
+			});
+		});
 	} catch (err) {
 		console.error(err);
 		cont.innerHTML = "<p class='empty-list'>Error al cargar los eventos.</p>";
 	}
 }
 
-
 /**
  * ---------- FUNCION LLENAR FORMULARIO ----------
  */
 function llenarFormularioEvento(evento) {
-	// Tipo de evento
 	document.querySelectorAll('input[name="eventType"]').forEach(r => r.checked = false);
 	if (evento.tipo) {
 		const tipoInput = document.querySelector(`input[name="eventType"][value="${evento.tipo}"]`);
 		if (tipoInput) tipoInput.checked = true;
 	}
 
-	// Campos comunes
 	document.getElementById("eventName").value = evento.nombre || "";
 	document.getElementById("eventDescription").value = evento.descripcion || "";
 	document.getElementById("eventCity").value = evento.ciudad || "";
@@ -274,6 +292,7 @@ function llenarFormularioEvento(evento) {
 		evento.tickets.forEach(ticket => {
 			const ticketHTML = document.createElement("div");
 			ticketHTML.classList.add("ticket-type-item");
+			ticketHTML.dataset.ticketId = ticket.id; // <- guardamos ID del ticket
 			ticketHTML.innerHTML = `
                 <div class="form-grid">
                     <div class="form-group">
@@ -297,7 +316,6 @@ function llenarFormularioEvento(evento) {
 	}
 }
 
-
 /**
  * ---------- FUNCION MOSTRAR CAMPOS SEGUN TIPO ----------
  */
@@ -309,4 +327,32 @@ function mostrarCamposPorTipo(tipo) {
 	cineFields.forEach(f => f.style.display = tipo === "cine" ? "block" : "none");
 	conciertoFields.forEach(f => f.style.display = tipo === "concierto" ? "block" : "none");
 	festivalFields.forEach(f => f.style.display = tipo === "festival" ? "block" : "none");
+}
+
+/**
+ * ---------- AGREGAR NUEVO TICKET ----------
+ */
+function agregarTicket() {
+	const ticketContainer = document.getElementById("ticketTypes");
+	const ticketHTML = document.createElement("div");
+	ticketHTML.classList.add("ticket-type-item");
+	ticketHTML.innerHTML = `
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Tipo de Entrada *</label>
+                <input type="text" name="ticketTypeName[]" value="" required>
+            </div>
+            <div class="form-group">
+                <label>Precio (€) *</label>
+                <input type="number" name="ticketTypePrice[]" value="0" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Cantidad Disponible *</label>
+                <input type="number" name="ticketTypeQuantity[]" value="1" min="1" required>
+            </div>
+        </div>
+        <button type="button" class="btn-remove-ticket">🗑️ Eliminar</button>
+    `;
+	ticketContainer.appendChild(ticketHTML);
+	ticketHTML.querySelector(".btn-remove-ticket").addEventListener("click", () => ticketHTML.remove());
 }

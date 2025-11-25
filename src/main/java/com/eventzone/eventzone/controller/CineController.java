@@ -73,7 +73,7 @@ public class CineController {
 			String imagesDir = imagenService.guardarImagen(imagen);
 
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 			LocalDate fecha = LocalDate.parse(fechaStr, formatter);
 
 			EventoCine cine = new EventoCine();

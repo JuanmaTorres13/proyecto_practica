@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.eventzone.eventzone.model.Evento;
 import com.eventzone.eventzone.model.EventoConcierto;
 import com.eventzone.eventzone.model.Ticket;
 import com.eventzone.eventzone.service.EventoService;
@@ -31,6 +32,30 @@ public class ConciertoController {
 	@Autowired
 	private ImagenService imagenService;
 
+	private void actualizarTickets(Evento evento, List<Ticket> tickets) {
+		if (tickets == null)
+			return;
+
+		// Eliminar tickets que ya no están
+		evento.getTickets()
+				.removeIf(t -> tickets.stream().noneMatch(nt -> nt.getId() != null && nt.getId().equals(t.getId())));
+
+		for (Ticket t : tickets) {
+			if (t.getId() != null) {
+				// Actualizar ticket existente
+				evento.getTickets().stream().filter(existing -> existing.getId().equals(t.getId())).findFirst()
+						.ifPresent(existing -> {
+							existing.setTipo(t.getTipo());
+							existing.setPrecio(t.getPrecio());
+							existing.setCantidad(t.getCantidad());
+						});
+			} else {
+				// Nuevo ticket
+				evento.addTicket(t);
+			}
+		}
+	}
+
 	@PostMapping("/crear")
 	public ResponseEntity<?> createConcierto(@RequestParam("tipo") String tipo, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
@@ -47,7 +72,7 @@ public class ConciertoController {
 			String imagesDir = imagenService.guardarImagen(imagen);
 
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 			LocalDate fecha = LocalDate.parse(fechaStr, formatter);
 
 			EventoConcierto concierto = new EventoConcierto();
@@ -67,10 +92,10 @@ public class ConciertoController {
 			concierto.setAperturaPuertas(
 					aperturaPuertasStr != null ? LocalTime.parse(aperturaPuertasStr, timeFormatter) : null);
 			concierto.setParking(parking != null ? parking : false);
-			
-			//Crear tickets y asociarlos
-			if(ticketsNombre!= null && ticketsPrecio!=null && ticketsCantidad != null) {
-				for(int i=0; i<ticketsNombre.size(); i++) {
+
+			// Crear tickets y asociarlos
+			if (ticketsNombre != null && ticketsPrecio != null && ticketsCantidad != null) {
+				for (int i = 0; i < ticketsNombre.size(); i++) {
 					Ticket ticket = new Ticket();
 					ticket.setTipo(ticketsNombre.get(i));
 					ticket.setPrecio(Double.parseDouble(ticketsPrecio.get(i)));
@@ -96,5 +121,53 @@ public class ConciertoController {
 	@GetMapping
 	public ResponseEntity<List<EventoConcierto>> getAllConciertos() {
 		return ResponseEntity.ok(eventoService.getAllConciertos());
+	}
+
+	@PutMapping("editar/concierto/{id}")
+	public ResponseEntity<?> updateConcierto(@PathVariable Long id, @RequestParam("nombre") String nombre,
+			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
+			@RequestParam("direccion") String direccion, @RequestParam("fecha") String fechaStr,
+			@RequestParam("contactoEmail") String contactoEmail,
+			@RequestParam(value = "imagenFile", required = false) MultipartFile imagen,
+			@RequestParam(required = false) String artista, @RequestParam(required = false) String artistasApertura,
+			@RequestParam(required = false) String recinto, @RequestParam(required = false) Integer capacidad,
+			@RequestParam(required = false) String horaComienzoStr,
+			@RequestParam(required = false) String aperturaPuertasStr, @RequestParam(required = false) Boolean parking,
+			@RequestBody(required = false) List<Ticket> tickets) {
+		try {
+			EventoConcierto concierto = (EventoConcierto) eventoService.getEventbyId(id).orElse(null);
+			if (concierto == null)
+				return ResponseEntity.status(404).body("Evento no encontrado");
+
+			concierto.setNombre(nombre);
+			concierto.setDescripcion(descripcion);
+			concierto.setCiudad(ciudad);
+			concierto.setDireccion(direccion);
+			concierto.setFecha(LocalDate.parse(fechaStr));
+			concierto.setContactoEmail(contactoEmail);
+			concierto.setArtista(artista);
+			concierto.setArtistasApertura(artistasApertura);
+			concierto.setRecinto(recinto);
+			concierto.setCapacidad(capacidad);
+			concierto.setHora(LocalTime.parse(horaComienzoStr));
+			concierto.setAperturaPuertas(LocalTime.parse(aperturaPuertasStr));
+			concierto.setParking(parking);
+
+			if (imagen != null && !imagen.isEmpty()) {
+				String imagesDir = "C:\\Users\\wul4p\\Desktop\\proyecto_practicas\\eventzone\\uploads\\";
+				String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
+				Path path = Paths.get(imagesDir + nombreArchivo);
+				Files.copy(imagen.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+				concierto.setImagenUrl("/uploads/" + nombreArchivo);
+			}
+
+			actualizarTickets(concierto, tickets);
+
+			EventoConcierto actualizado = eventoService.saveConcierto(concierto);
+			return ResponseEntity.ok(actualizado);
+
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Error al editar el evento");
+		}
 	}
 }
