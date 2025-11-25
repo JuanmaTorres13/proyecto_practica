@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.eventzone.eventzone.model.Evento;
 import com.eventzone.eventzone.model.EventoCine;
 import com.eventzone.eventzone.model.EventoFestival;
 import com.eventzone.eventzone.model.Ticket;
@@ -32,6 +33,30 @@ public class FestivalController {
 	@Autowired
 	private ImagenService imagenService;
 
+	private void actualizarTickets(Evento evento, List<Ticket> tickets) {
+		if (tickets == null)
+			return;
+
+		// Eliminar tickets que ya no están
+		evento.getTickets()
+				.removeIf(t -> tickets.stream().noneMatch(nt -> nt.getId() != null && nt.getId().equals(t.getId())));
+
+		for (Ticket t : tickets) {
+			if (t.getId() != null) {
+				// Actualizar ticket existente
+				evento.getTickets().stream().filter(existing -> existing.getId().equals(t.getId())).findFirst()
+						.ifPresent(existing -> {
+							existing.setTipo(t.getTipo());
+							existing.setPrecio(t.getPrecio());
+							existing.setCantidad(t.getCantidad());
+						});
+			} else {
+				// Nuevo ticket
+				evento.addTicket(t);
+			}
+		}
+	}
+
 	@PostMapping("/crear")
 	public ResponseEntity<?> createFestival(@RequestParam("tipo") String tipo, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
@@ -48,7 +73,7 @@ public class FestivalController {
 			String imagesDir = imagenService.guardarImagen(imagen);
 
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 			LocalDate fecha = LocalDate.parse(fechaStr, formatter);
 			LocalDate fechaFin = LocalDate.parse(fechaFinStr, formatter);
 
@@ -98,5 +123,54 @@ public class FestivalController {
 	@GetMapping
 	public ResponseEntity<List<EventoFestival>> getAllFestivales() {
 		return ResponseEntity.ok(eventoService.getAllFestivales());
+	}
+
+	@PutMapping("editar/festival/{id}")
+	public ResponseEntity<?> updateFestival(@PathVariable Long id, @RequestParam("nombre") String nombre,
+			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
+			@RequestParam("direccion") String direccion, @RequestParam("fecha") String fechaStr,
+			@RequestParam("contactoEmail") String contactoEmail,
+			@RequestParam(value = "imagenFile", required = false) MultipartFile imagen,
+			@RequestParam(required = false) String cartelArtistas, @RequestParam(required = false) Integer diasDuracion,
+			@RequestParam(required = false) String FechaFinStr, @RequestParam(required = false) String recinto,
+			@RequestParam(required = false) Integer capacidad, @RequestParam(required = false) String horaComienzoStr,
+			@RequestParam(required = false) String aperturaPuertasStr, @RequestParam(required = false) Boolean parking,
+			@RequestBody(required = false) List<Ticket> tickets) {
+
+		try {
+			EventoFestival festival = (EventoFestival) eventoService.getEventbyId(id).orElse(null);
+			if (festival == null)
+				return ResponseEntity.status(404).body("Evento no encontrado");
+
+			festival.setNombre(nombre);
+			festival.setDescripcion(descripcion);
+			festival.setCiudad(ciudad);
+			festival.setDireccion(direccion);
+			festival.setFecha(LocalDate.parse(fechaStr));
+			festival.setContactoEmail(contactoEmail);
+			festival.setCartelArtistas(cartelArtistas);
+			festival.setFestivalDias(diasDuracion);
+			festival.setFechaFin(LocalDate.parse(FechaFinStr));
+			festival.setRecinto(recinto);
+			festival.setCapacidad(capacidad);
+			festival.setHora(LocalTime.parse(horaComienzoStr));
+			festival.setAperturaPuertas(LocalTime.parse(aperturaPuertasStr));
+			festival.setParking(parking);
+
+			if (imagen != null && !imagen.isEmpty()) {
+				String imagesDir = "C:\\Users\\wul4p\\Desktop\\proyecto_practicas\\eventzone\\uploads\\";
+				String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
+				Path path = Paths.get(imagesDir + nombreArchivo);
+				Files.copy(imagen.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+				festival.setImagenUrl("/uploads/" + nombreArchivo);
+			}
+
+			actualizarTickets(festival, tickets);
+
+			EventoFestival actualizado = eventoService.saveFestival(festival);
+			return ResponseEntity.ok(actualizado);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Error al editar el evento");
+		}
 	}
 }
