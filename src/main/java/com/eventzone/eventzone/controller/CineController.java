@@ -122,7 +122,7 @@ public class CineController {
 		return ResponseEntity.ok(eventoService.getAllCines());
 	}
 	
-	@PutMapping("/editar/cine/{id}")
+	@PutMapping("/editar/{id}")
 	public ResponseEntity<?> updateCine(
 	        @PathVariable Long id,
 	        @RequestParam("nombre") String nombre,

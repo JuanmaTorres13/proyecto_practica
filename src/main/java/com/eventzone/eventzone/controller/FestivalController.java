@@ -125,7 +125,7 @@ public class FestivalController {
 		return ResponseEntity.ok(eventoService.getAllFestivales());
 	}
 
-	@PutMapping("editar/festival/{id}")
+	@PutMapping("editar/{id}")
 	public ResponseEntity<?> updateFestival(@PathVariable Long id, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
 			@RequestParam("direccion") String direccion, @RequestParam("fecha") String fechaStr,
