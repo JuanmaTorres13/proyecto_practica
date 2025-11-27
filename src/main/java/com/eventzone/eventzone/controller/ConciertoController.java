@@ -123,7 +123,7 @@ public class ConciertoController {
 		return ResponseEntity.ok(eventoService.getAllConciertos());
 	}
 
-	@PutMapping("editar/concierto/{id}")
+	@PutMapping("editar/{id}")
 	public ResponseEntity<?> updateConcierto(@PathVariable Long id, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
 			@RequestParam("direccion") String direccion, @RequestParam("fecha") String fechaStr,

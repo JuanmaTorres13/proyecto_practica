@@ -195,7 +195,7 @@ async function cargarEventos() {
 						const res = await fetch(`/eventos/eliminar/${id}`, { method: "DELETE" });
 						if (!res.ok) throw new Error(await res.text() || "Error al eliminar evento");
 						Swal.fire({ icon: "success", title: "Evento eliminado", showConfirmButton: false, timer: 1500 });
-						card.remove();
+						card.remove();	
 					} catch (err) {
 						console.error(err);
 						Swal.fire({ icon: "error", title: "No se pudo eliminar", text: err.message });
@@ -207,6 +207,7 @@ async function cargarEventos() {
 		// Editar evento
 		cont.querySelectorAll(".btn-edit").forEach(btn => {
 			btn.addEventListener("click", async () => {
+
 				const card = btn.closest(".ticket-card");
 				const id = card.dataset.id;
 				const tipo = card.dataset.tipo;
@@ -222,9 +223,9 @@ async function cargarEventos() {
 					if (editTab) editTab.click();
 
 					// Guardar ID de evento en el formulario para editar
-					const form = document.getElementById("formEvento");
+					const form = document.getElementById("eventForm");
 					form.dataset.eventoId = id;
-
+					
 				} catch (err) {
 					console.error(err);
 					Swal.fire({ icon: "error", title: "No se pudo cargar evento", text: err.message });
