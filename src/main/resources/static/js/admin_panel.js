@@ -211,6 +211,8 @@ async function cargarEventos() {
 				const card = btn.closest(".ticket-card");
 				const id = card.dataset.id;
 				const tipo = card.dataset.tipo;
+				console.log("ID del evento:", id);
+
 				if (!id) return;
 
 				try {
@@ -357,3 +359,136 @@ function agregarTicket() {
 	ticketContainer.appendChild(ticketHTML);
 	ticketHTML.querySelector(".btn-remove-ticket").addEventListener("click", () => ticketHTML.remove());
 }
+
+
+
+/**
+ * ---------- GUARDAR EDICIÓN DE EVENTO ----------
+ */
+async function editarEvento() {
+
+	const form = document.getElementById("eventForm");
+	const eventoId = form.dataset.eventoId; 
+
+	if (!eventoId) {
+		console.error("No hay evento cargado para editar.");
+		return;
+	}
+
+	// Obtener tipo del evento seleccionado
+	const tipoInput = document.querySelector('input[name="eventType"]:checked');
+	if (!tipoInput) {
+		Swal.fire("Error", "Seleccione el tipo de evento", "warning");
+		return;
+	}
+	const tipo = tipoInput.value.toLowerCase();
+
+	// Datos base
+	const data = {
+		tipo,
+		nombre: document.getElementById("eventName").value,
+		descripcion: document.getElementById("eventDescription").value,
+		ciudad: document.getElementById("eventCity").value,
+		direccion: document.getElementById("eventAddress").value,
+		fecha: document.getElementById("eventDate").value,
+		contactoEmail: document.getElementById("eventContact").value,
+		tickets: []
+	};
+
+	// Datos específicos según tipo
+	if (tipo === "cine") {
+		data.tituloPelicula = document.getElementById("movieTitle").value;
+		data.director = document.getElementById("movieDirector").value;
+		data.clasificacion = document.getElementById("movieRating").value;
+		data.idioma = document.getElementById("movieLanguage").value;
+		data.sala = document.getElementById("movieSala").value;
+		data.asientos = document.getElementById("movieAsientos").value;
+		data.horarioSesion = document.getElementById("movieHorario").value;
+	}
+
+	if (tipo === "concierto") {
+		data.artista = document.getElementById("artistName").value;
+		data.artistasApertura = document.getElementById("supportActs").value;
+		data.recinto = document.getElementById("venueConcierto").value;
+		data.capacidad = document.getElementById("capacityConcierto").value;
+		data.horaComienzo = document.getElementById("horaConcierto").value;
+		data.aperturaPuertas = document.getElementById("puertasConcierto").value;
+		data.parking = document.getElementById("parkingConcierto").checked;
+	}
+
+	if (tipo === "festival") {
+		data.cartelArtistas = document.getElementById("festivalLineup").value;
+		data.diasDuracion = document.getElementById("festivalDays").value;
+		data.fechaFin = document.getElementById("festivalEndDate").value;
+		data.recinto = document.getElementById("venueFestival").value;
+		data.capacidad = document.getElementById("capacityFestival").value;
+		data.horaComienzo = document.getElementById("horaFestival").value;
+		data.aperturaPuertas = document.getElementById("puertasFestival").value;
+		data.parking = document.getElementById("parkingFestival").checked;
+	}
+
+	// Tickets
+	document.querySelectorAll(".ticket-type-item").forEach(t => {
+		const ticketId = t.dataset.ticketId || null;
+
+		data.tickets.push({
+			id: ticketId,
+			tipo: t.querySelector('input[name="ticketTypeName[]"]').value,
+			precio: parseFloat(t.querySelector('input[name="ticketTypePrice[]"]').value),
+			cantidad: parseInt(t.querySelector('input[name="ticketTypeQuantity[]"]').value)
+		});
+	});
+
+	// Seleccionar ruta correcta según tipo
+	let url = "";
+
+	if (tipo === "cine") url = `/eventos/cine/editar/${eventoId}`;
+	if (tipo === "concierto") url = `/eventos/concierto/editar/${eventoId}`;
+	if (tipo === "festival") url = `/eventos/festival/editar/${eventoId}`;
+
+	try {
+		const res = await fetch(url, {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data)
+		});
+
+		if (!res.ok) throw new Error(await res.text());
+
+		Swal.fire({
+			icon: "success",
+			title: "Evento actualizado",
+			timer: 1500,
+			showConfirmButton: false
+		});
+
+		// Reset y volver
+		form.reset();
+		delete form.dataset.eventoId;
+
+		cargarEventos();
+		document.querySelector('.menu-item[data-tab="tab-eventos"]').click();
+
+	} catch (err) {
+		console.error(err);
+		Swal.fire("Error", err.message, "error");
+	}
+}
+
+/**
+ * ---------- SUBMIT DEL FORMULARIO ----------
+ */
+document.getElementById("eventForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const eventoId = form.dataset.eventoId;
+
+    // Si existe ID → es una edición
+    if (eventoId) {
+        editarEvento();
+        return;
+    }
+});
+
+
