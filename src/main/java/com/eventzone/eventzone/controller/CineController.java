@@ -73,7 +73,7 @@ public class CineController {
 			String imagesDir = imagenService.guardarImagen(imagen);
 
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm[:ss][.SSS]");
 			LocalDate fecha = LocalDate.parse(fechaStr, formatter);
 
 			EventoCine cine = new EventoCine();
@@ -122,7 +122,7 @@ public class CineController {
 		return ResponseEntity.ok(eventoService.getAllCines());
 	}
 	
-	@PutMapping("/editar/{id}")
+	@PostMapping("/editar/{id}")
 	public ResponseEntity<?> updateCine(
 	        @PathVariable Long id,
 	        @RequestParam("nombre") String nombre,
@@ -136,40 +136,63 @@ public class CineController {
 	        @RequestParam(required = false) String director,
 	        @RequestParam(required = false) String clasificacion,
 	        @RequestParam(required = false) String idioma,
-	        @RequestBody(required = false) List<Ticket> tickets
+	        @RequestParam(required = false) String sala,
+	        @RequestParam(required = false) Integer asientos,
+	        @RequestParam(required = false) String horarioSesionStr,
+	        @RequestParam(required = false) List<String> ticketsNombre,
+	        @RequestParam(required = false) List<String> ticketsPrecio,
+	        @RequestParam(required = false) List<String> ticketsCantidad
 	) {
 	    try {
 	        EventoCine cine = (EventoCine) eventoService.getEventbyId(id).orElse(null);
-	        if (cine == null) return ResponseEntity.status(404).body("Evento no encontrado");
+	        if (cine == null) {
+	            return ResponseEntity.status(404).body("Evento no encontrado");
+	        }
 
+	        // Actualizar campos
 	        cine.setNombre(nombre);
 	        cine.setDescripcion(descripcion);
 	        cine.setCiudad(ciudad);
 	        cine.setDireccion(direccion);
 	        cine.setFecha(LocalDate.parse(fechaStr));
 	        cine.setContactoEmail(contactoEmail);
+
 	        cine.setCineTitulo(tituloPelicula);
 	        cine.setCineDirector(director);
 	        cine.setClasificacion(clasificacion);
 	        cine.setIdioma(idioma);
+	        cine.setCineSala(sala);
+	        cine.setCineAsientos(asientos);
+	        cine.setCineHorarios(horarioSesionStr != null ? LocalTime.parse(horarioSesionStr) : null);
 
+	        // IMAGEN
 	        if (imagen != null && !imagen.isEmpty()) {
-	            String imagesDir = "C:\\Users\\wul4p\\Desktop\\proyecto_practicas\\eventzone\\uploads\\";
-	            String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
-	            Path path = Paths.get(imagesDir + nombreArchivo);
-	            Files.copy(imagen.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-	            cine.setImagenUrl("/uploads/" + nombreArchivo);
+	            String imagenUrl = imagenService.guardarImagen(imagen);
+	            cine.setImagenUrl(imagenUrl);
 	        }
 
-	        actualizarTickets(cine, tickets);
+	        // TICKETS
+	        cine.getTickets().clear();
+	        if (ticketsNombre != null) {
+	            for (int i = 0; i < ticketsNombre.size(); i++) {
+	                Ticket t = new Ticket();
+	                t.setTipo(ticketsNombre.get(i));
+	                t.setPrecio(Double.parseDouble(ticketsPrecio.get(i)));
+	                t.setCantidad(Integer.parseInt(ticketsCantidad.get(i)));
+	                t.setEvento(cine);
+	                cine.addTicket(t);
+	            }
+	        }
 
 	        EventoCine actualizado = eventoService.saveCine(cine);
 	        return ResponseEntity.ok(actualizado);
 
 	    } catch (Exception e) {
+	        e.printStackTrace();
 	        return ResponseEntity.status(500).body("Error al editar el evento");
 	    }
 	}
+
 
 
 }
