@@ -73,7 +73,7 @@ public class FestivalController {
 			String imagesDir = imagenService.guardarImagen(imagen);
 
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm[:ss][.SSS]");
 			LocalDate fecha = LocalDate.parse(fechaStr, formatter);
 			LocalDate fechaFin = LocalDate.parse(fechaFinStr, formatter);
 
