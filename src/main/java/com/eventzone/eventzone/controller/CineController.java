@@ -31,31 +31,30 @@ public class CineController {
 
 	@Autowired
 	private ImagenService imagenService;
-	
+
 	private void actualizarTickets(Evento evento, List<Ticket> tickets) {
-	    if (tickets == null) return;
+		if (tickets == null)
+			return;
 
-	    // Eliminar tickets que ya no están
-	    evento.getTickets().removeIf(t -> tickets.stream().noneMatch(nt -> nt.getId() != null && nt.getId().equals(t.getId())));
+		// Eliminar tickets que ya no están
+		evento.getTickets()
+				.removeIf(t -> tickets.stream().noneMatch(nt -> nt.getId() != null && nt.getId().equals(t.getId())));
 
-	    for (Ticket t : tickets) {
-	        if (t.getId() != null) {
-	            // Actualizar ticket existente
-	            evento.getTickets().stream()
-	                .filter(existing -> existing.getId().equals(t.getId()))
-	                .findFirst()
-	                .ifPresent(existing -> {
-	                    existing.setTipo(t.getTipo());
-	                    existing.setPrecio(t.getPrecio());
-	                    existing.setCantidad(t.getCantidad());
-	                });
-	        } else {
-	            // Nuevo ticket
-	            evento.addTicket(t);
-	        }
-	    }
+		for (Ticket t : tickets) {
+			if (t.getId() != null) {
+				// Actualizar ticket existente
+				evento.getTickets().stream().filter(existing -> existing.getId().equals(t.getId())).findFirst()
+						.ifPresent(existing -> {
+							existing.setTipo(t.getTipo());
+							existing.setPrecio(t.getPrecio());
+							existing.setCantidad(t.getCantidad());
+						});
+			} else {
+				// Nuevo ticket
+				evento.addTicket(t);
+			}
+		}
 	}
-
 
 	@PostMapping("/crear")
 	public ResponseEntity<?> createCine(@RequestParam("tipo") String tipo, @RequestParam("nombre") String nombre,
@@ -121,78 +120,68 @@ public class CineController {
 	public ResponseEntity<List<EventoCine>> getAllCines() {
 		return ResponseEntity.ok(eventoService.getAllCines());
 	}
-	
+
 	@PostMapping("/editar/{id}")
-	public ResponseEntity<?> updateCine(
-	        @PathVariable Long id,
-	        @RequestParam("nombre") String nombre,
-	        @RequestParam("descripcion") String descripcion,
-	        @RequestParam("ciudad") String ciudad,
-	        @RequestParam("direccion") String direccion,
-	        @RequestParam("fecha") String fechaStr,
-	        @RequestParam("contactoEmail") String contactoEmail,
-	        @RequestParam(value = "imagenFile", required = false) MultipartFile imagen,
-	        @RequestParam(required = false) String tituloPelicula,
-	        @RequestParam(required = false) String director,
-	        @RequestParam(required = false) String clasificacion,
-	        @RequestParam(required = false) String idioma,
-	        @RequestParam(required = false) String sala,
-	        @RequestParam(required = false) Integer asientos,
-	        @RequestParam(required = false) String horarioSesionStr,
-	        @RequestParam(required = false) List<String> ticketsNombre,
-	        @RequestParam(required = false) List<String> ticketsPrecio,
-	        @RequestParam(required = false) List<String> ticketsCantidad
-	) {
-	    try {
-	        EventoCine cine = (EventoCine) eventoService.getEventbyId(id).orElse(null);
-	        if (cine == null) {
-	            return ResponseEntity.status(404).body("Evento no encontrado");
-	        }
+	public ResponseEntity<?> updateCine(@PathVariable Long id, @RequestParam("nombre") String nombre,
+			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
+			@RequestParam("direccion") String direccion, @RequestParam("fecha") String fechaStr,
+			@RequestParam("contactoEmail") String contactoEmail,
+			@RequestParam(value = "imagenFile", required = false) MultipartFile imagen,
+			@RequestParam(required = false) String tituloPelicula, @RequestParam(required = false) String director,
+			@RequestParam(required = false) String clasificacion, @RequestParam(required = false) String idioma,
+			@RequestParam(required = false) String sala, @RequestParam(required = false) Integer asientos,
+			@RequestParam(required = false) String horarioSesionStr,
+			@RequestParam(required = false) List<String> ticketsNombre,
+			@RequestParam(required = false) List<String> ticketsPrecio,
+			@RequestParam(required = false) List<String> ticketsCantidad) {
+		try {
+			EventoCine cine = (EventoCine) eventoService.getEventbyId(id).orElse(null);
+			if (cine == null) {
+				return ResponseEntity.status(404).body("Evento no encontrado");
+			}
 
-	        // Actualizar campos
-	        cine.setNombre(nombre);
-	        cine.setDescripcion(descripcion);
-	        cine.setCiudad(ciudad);
-	        cine.setDireccion(direccion);
-	        cine.setFecha(LocalDate.parse(fechaStr));
-	        cine.setContactoEmail(contactoEmail);
+			// Actualizar campos
+			cine.setNombre(nombre);
+			cine.setDescripcion(descripcion);
+			cine.setCiudad(ciudad);
+			cine.setDireccion(direccion);
+			cine.setFecha(LocalDate.parse(fechaStr));
+			cine.setContactoEmail(contactoEmail);
 
-	        cine.setCineTitulo(tituloPelicula);
-	        cine.setCineDirector(director);
-	        cine.setClasificacion(clasificacion);
-	        cine.setIdioma(idioma);
-	        cine.setCineSala(sala);
-	        cine.setCineAsientos(asientos);
-	        cine.setCineHorarios(horarioSesionStr != null ? LocalTime.parse(horarioSesionStr) : null);
+			cine.setCineTitulo(tituloPelicula);
+			cine.setCineDirector(director);
+			cine.setClasificacion(clasificacion);
+			cine.setIdioma(idioma);
+			cine.setCineSala(sala);
+			cine.setCineAsientos(asientos);
+			cine.setCineHorarios(horarioSesionStr != null ? LocalTime.parse(horarioSesionStr) : null);
 
-	        // IMAGEN
-	        if (imagen != null && !imagen.isEmpty()) {
-	            String imagenUrl = imagenService.guardarImagen(imagen);
-	            cine.setImagenUrl(imagenUrl);
-	        }
+			// IMAGEN
+			if (imagen != null && !imagen.isEmpty()) {
+				String imagenUrl = imagenService.guardarImagen(imagen);
+				cine.setImagenUrl(imagenUrl);
+			}
 
-	        // TICKETS
-	        cine.getTickets().clear();
-	        if (ticketsNombre != null) {
-	            for (int i = 0; i < ticketsNombre.size(); i++) {
-	                Ticket t = new Ticket();
-	                t.setTipo(ticketsNombre.get(i));
-	                t.setPrecio(Double.parseDouble(ticketsPrecio.get(i)));
-	                t.setCantidad(Integer.parseInt(ticketsCantidad.get(i)));
-	                t.setEvento(cine);
-	                cine.addTicket(t);
-	            }
-	        }
+			// TICKETS
+			cine.getTickets().clear();
+			if (ticketsNombre != null) {
+				for (int i = 0; i < ticketsNombre.size(); i++) {
+					Ticket t = new Ticket();
+					t.setTipo(ticketsNombre.get(i));
+					t.setPrecio(Double.parseDouble(ticketsPrecio.get(i)));
+					t.setCantidad(Integer.parseInt(ticketsCantidad.get(i)));
+					t.setEvento(cine);
+					cine.addTicket(t);
+				}
+			}
 
-	        EventoCine actualizado = eventoService.saveCine(cine);
-	        return ResponseEntity.ok(actualizado);
+			EventoCine actualizado = eventoService.saveCine(cine);
+			return ResponseEntity.ok(actualizado);
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(500).body("Error al editar el evento");
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(500).body("Error al editar el evento");
+		}
 	}
-
-
 
 }

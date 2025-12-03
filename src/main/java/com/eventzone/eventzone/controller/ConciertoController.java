@@ -123,7 +123,7 @@ public class ConciertoController {
 		return ResponseEntity.ok(eventoService.getAllConciertos());
 	}
 
-	@PutMapping("editar/{id}")
+	@PostMapping("editar/{id}")
 	public ResponseEntity<?> updateConcierto(@PathVariable Long id, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
 			@RequestParam("direccion") String direccion, @RequestParam("fecha") String fechaStr,
@@ -133,7 +133,9 @@ public class ConciertoController {
 			@RequestParam(required = false) String recinto, @RequestParam(required = false) Integer capacidad,
 			@RequestParam(required = false) String horaComienzoStr,
 			@RequestParam(required = false) String aperturaPuertasStr, @RequestParam(required = false) Boolean parking,
-			@RequestBody(required = false) List<Ticket> tickets) {
+			@RequestParam(required = false) List<String> ticketsNombre,
+			@RequestParam(required = false) List<String> ticketsPrecio,
+			@RequestParam(required = false) List<String> ticketsCantidad) {
 		try {
 			EventoConcierto concierto = (EventoConcierto) eventoService.getEventbyId(id).orElse(null);
 			if (concierto == null)
@@ -145,6 +147,7 @@ public class ConciertoController {
 			concierto.setDireccion(direccion);
 			concierto.setFecha(LocalDate.parse(fechaStr));
 			concierto.setContactoEmail(contactoEmail);
+			
 			concierto.setArtista(artista);
 			concierto.setArtistasApertura(artistasApertura);
 			concierto.setRecinto(recinto);
@@ -153,16 +156,25 @@ public class ConciertoController {
 			concierto.setAperturaPuertas(LocalTime.parse(aperturaPuertasStr));
 			concierto.setParking(parking);
 
+			//IMAGEN
 			if (imagen != null && !imagen.isEmpty()) {
-				String imagesDir = "C:\\Users\\wul4p\\Desktop\\proyecto_practicas\\eventzone\\uploads\\";
-				String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
-				Path path = Paths.get(imagesDir + nombreArchivo);
-				Files.copy(imagen.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				concierto.setImagenUrl("/uploads/" + nombreArchivo);
+				String imagenUrl = imagenService.guardarImagen(imagen);
+				concierto.setImagenUrl(imagenUrl);
 			}
 
-			actualizarTickets(concierto, tickets);
-
+			//TICKETS
+			concierto.getTickets().clear();
+			if(ticketsNombre !=null) {
+				for(int i = 0; i <ticketsNombre.size(); i++) {
+					Ticket t = new Ticket();
+					t.setTipo(ticketsNombre.get(i));
+					t.setPrecio(Double.parseDouble(ticketsPrecio.get(i)));
+					t.setCantidad(Integer.parseInt(ticketsCantidad.get(i)));
+					t.setEvento(concierto);
+					concierto.addTicket(t);
+				}
+			}
+			
 			EventoConcierto actualizado = eventoService.saveConcierto(concierto);
 			return ResponseEntity.ok(actualizado);
 
