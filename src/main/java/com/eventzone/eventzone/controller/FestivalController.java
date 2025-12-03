@@ -125,7 +125,7 @@ public class FestivalController {
 		return ResponseEntity.ok(eventoService.getAllFestivales());
 	}
 
-	@PutMapping("editar/{id}")
+	@PostMapping("editar/{id}")
 	public ResponseEntity<?> updateFestival(@PathVariable Long id, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
 			@RequestParam("direccion") String direccion, @RequestParam("fecha") String fechaStr,
@@ -135,19 +135,23 @@ public class FestivalController {
 			@RequestParam(required = false) String FechaFinStr, @RequestParam(required = false) String recinto,
 			@RequestParam(required = false) Integer capacidad, @RequestParam(required = false) String horaComienzoStr,
 			@RequestParam(required = false) String aperturaPuertasStr, @RequestParam(required = false) Boolean parking,
-			@RequestBody(required = false) List<Ticket> tickets) {
+			@RequestParam(required = false) List<String> ticketsNombre,
+			@RequestParam(required = false) List<String> ticketsPrecio,
+			@RequestParam(required = false) List<String> ticketsCantidad) {
 
 		try {
 			EventoFestival festival = (EventoFestival) eventoService.getEventbyId(id).orElse(null);
 			if (festival == null)
 				return ResponseEntity.status(404).body("Evento no encontrado");
 
+			//ACTUALIZAR CAMPOS
 			festival.setNombre(nombre);
 			festival.setDescripcion(descripcion);
 			festival.setCiudad(ciudad);
 			festival.setDireccion(direccion);
 			festival.setFecha(LocalDate.parse(fechaStr));
 			festival.setContactoEmail(contactoEmail);
+			
 			festival.setCartelArtistas(cartelArtistas);
 			festival.setFestivalDias(diasDuracion);
 			festival.setFechaFin(LocalDate.parse(FechaFinStr));
@@ -157,15 +161,24 @@ public class FestivalController {
 			festival.setAperturaPuertas(LocalTime.parse(aperturaPuertasStr));
 			festival.setParking(parking);
 
+			//IMAGEN
 			if (imagen != null && !imagen.isEmpty()) {
-				String imagesDir = "C:\\Users\\wul4p\\Desktop\\proyecto_practicas\\eventzone\\uploads\\";
-				String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
-				Path path = Paths.get(imagesDir + nombreArchivo);
-				Files.copy(imagen.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				festival.setImagenUrl("/uploads/" + nombreArchivo);
+				String imagenUrl = imagenService.guardarImagen(imagen);
+				festival.setImagenUrl(imagenUrl);
 			}
-
-			actualizarTickets(festival, tickets);
+		
+			//TICKETS
+			festival.getTickets().clear();
+			if(ticketsNombre != null) {
+				for(int i = 0; i<ticketsNombre.size(); i++) {
+					Ticket t = new Ticket();
+					t.setTipo(ticketsNombre.get(i));
+					t.setPrecio(Double.parseDouble(ticketsPrecio.get(i)));
+					t.setCantidad(Integer.parseInt(ticketsCantidad.get(i)));
+					t.setEvento(festival);
+					festival.addTicket(t);
+				}
+			}
 
 			EventoFestival actualizado = eventoService.saveFestival(festival);
 			return ResponseEntity.ok(actualizado);

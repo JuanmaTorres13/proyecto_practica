@@ -6,6 +6,26 @@ document.addEventListener("DOMContentLoaded", () => {
 	llamarEvento();
 });
 
+let archivoImagen = null; // variable global para guardar el archivo seleccionado
+
+const imagenInput = document.getElementById("imagenFile");
+if (imagenInput) {
+    imagenInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        archivoImagen = file || null;
+
+        const imagePreview = document.getElementById("imagePreview");
+        if (imagePreview) {
+            if (file) {
+                imagePreview.src = URL.createObjectURL(file); // previsualiza la nueva imagen
+            } else {
+                imagePreview.src = document.getElementById("eventForm").dataset.imagenUrl || '/images/default-event.jpg';
+            }
+        }
+    });
+}
+
+
 /**
  * ---------- CAMBIO DE PESTAÑAS ----------
  */
@@ -251,6 +271,24 @@ function llenarFormularioEvento(evento) {
 		if (tipoInput) tipoInput.checked = true;
 	}
 
+	
+	// Guardar la URL de la imagen actual
+	const form = document.getElementById("eventForm");
+	form.dataset.imagenUrl = evento.imagenUrl || '/images/default-image.jpg';
+
+	// Mostrar la imagen en la previsualización
+	const imagePreview = document.getElementById("imagePreview");
+	if (imagePreview) {
+	    imagePreview.src = evento.imagenUrl || '/images/default-image.jpg';
+	}
+
+	// Opcional: quitar required al editar
+	const imagenInput = document.getElementById("imagenFile");
+	if (imagenInput) {
+	    imagenInput.required = !evento.imagenUrl; // solo requerido si no hay imagen
+	}
+	
+	
 	document.getElementById("eventName").value = evento.nombre || "";
 	document.getElementById("eventDescription").value = evento.descripcion || "";
 	document.getElementById("eventCity").value = evento.ciudad || "";
@@ -403,8 +441,11 @@ async function editarEvento(eventoId) {
 	formData.append("fecha", document.getElementById("eventDate").value);
 	formData.append("contactoEmail", document.getElementById("eventContact").value);
 
-	if (archivoImagen) formData.append("imagenFile", archivoImagen);
-
+	if (archivoImagen) {
+		formData.append("imagenFile", archivoImagen);
+	} else if (form.dataset.imagenUrl) {
+		formData.append("imagenUrl", form.dataset.imagenUrl);
+	}
 	// Campos específicos según tipo
 	if (tipo === "cine") {
 		formData.append("tituloPelicula", document.getElementById("movieTitle").value);
