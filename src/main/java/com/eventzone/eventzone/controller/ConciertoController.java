@@ -157,10 +157,18 @@ public class ConciertoController {
 			concierto.setParking(parking);
 
 			//IMAGEN
-			if (imagen != null && !imagen.isEmpty()) {
-				String imagenUrl = imagenService.guardarImagen(imagen);
-				concierto.setImagenUrl(imagenUrl);
-			}
+	        if (imagen != null && !imagen.isEmpty()) {
+
+	            String imagenAnterior = concierto.getImagenUrl();  // URL antigua
+
+	            String nuevaImagenUrl = imagenService.guardarImagen(imagen); // URL nueva
+
+	            if (imagenAnterior != null && !imagenAnterior.isEmpty()) {
+	                imagenService.eliminarImagen(imagenAnterior); // borrar anterior
+	            }
+
+	            concierto.setImagenUrl(nuevaImagenUrl);
+	        }
 
 			//TICKETS
 			concierto.getTickets().clear();

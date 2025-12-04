@@ -157,10 +157,18 @@ public class CineController {
 			cine.setCineHorarios(horarioSesionStr != null ? LocalTime.parse(horarioSesionStr) : null);
 
 			// IMAGEN
-			if (imagen != null && !imagen.isEmpty()) {
-				String imagenUrl = imagenService.guardarImagen(imagen);
-				cine.setImagenUrl(imagenUrl);
-			}
+	        if (imagen != null && !imagen.isEmpty()) {
+
+	            String imagenAnterior = cine.getImagenUrl();  // URL antigua
+
+	            String nuevaImagenUrl = imagenService.guardarImagen(imagen); // URL nueva
+
+	            if (imagenAnterior != null && !imagenAnterior.isEmpty()) {
+	                imagenService.eliminarImagen(imagenAnterior); // borrar anterior
+	            }
+
+	            cine.setImagenUrl(nuevaImagenUrl);
+	        }
 
 			// TICKETS
 			cine.getTickets().clear();
