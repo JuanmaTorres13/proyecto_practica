@@ -162,10 +162,18 @@ public class FestivalController {
 			festival.setParking(parking);
 
 			//IMAGEN
-			if (imagen != null && !imagen.isEmpty()) {
-				String imagenUrl = imagenService.guardarImagen(imagen);
-				festival.setImagenUrl(imagenUrl);
-			}
+	        if (imagen != null && !imagen.isEmpty()) {
+
+	            String imagenAnterior = festival.getImagenUrl();  // URL antigua
+
+	            String nuevaImagenUrl = imagenService.guardarImagen(imagen); // URL nueva
+
+	            if (imagenAnterior != null && !imagenAnterior.isEmpty()) {
+	                imagenService.eliminarImagen(imagenAnterior); // borrar anterior
+	            }
+
+	            festival.setImagenUrl(nuevaImagenUrl);
+	        }
 		
 			//TICKETS
 			festival.getTickets().clear();
