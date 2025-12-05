@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.eventzone.eventzone.model.Evento;
-import com.eventzone.eventzone.model.EventoCine;
 import com.eventzone.eventzone.model.EventoFestival;
 import com.eventzone.eventzone.model.Ticket;
 import com.eventzone.eventzone.service.EventoService;
@@ -125,7 +124,7 @@ public class FestivalController {
 		return ResponseEntity.ok(eventoService.getAllFestivales());
 	}
 
-	@PostMapping("editar/{id}")
+	@PostMapping("/editar/{id}")
 	public ResponseEntity<?> updateFestival(@PathVariable Long id, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
 			@RequestParam("direccion") String direccion, @RequestParam("fecha") String fechaStr,

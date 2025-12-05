@@ -488,7 +488,7 @@ async function editarEvento(eventoId) {
 
 	try {
 		const res = await fetch(url, {
-			method: "POST",  // <-- POST para evitar problemas con multipart/form-data
+			method: "POST",  // POST para evitar problemas con multipart/form-data
 			body: formData
 		});
 
