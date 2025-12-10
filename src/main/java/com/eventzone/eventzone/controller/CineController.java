@@ -32,30 +32,6 @@ public class CineController {
 	@Autowired
 	private ImagenService imagenService;
 
-	private void actualizarTickets(Evento evento, List<Ticket> tickets) {
-		if (tickets == null)
-			return;
-
-		// Eliminar tickets que ya no están
-		evento.getTickets()
-				.removeIf(t -> tickets.stream().noneMatch(nt -> nt.getId() != null && nt.getId().equals(t.getId())));
-
-		for (Ticket t : tickets) {
-			if (t.getId() != null) {
-				// Actualizar ticket existente
-				evento.getTickets().stream().filter(existing -> existing.getId().equals(t.getId())).findFirst()
-						.ifPresent(existing -> {
-							existing.setTipo(t.getTipo());
-							existing.setPrecio(t.getPrecio());
-							existing.setCantidad(t.getCantidad());
-						});
-			} else {
-				// Nuevo ticket
-				evento.addTicket(t);
-			}
-		}
-	}
-
 	@PostMapping("/crear")
 	public ResponseEntity<?> createCine(@RequestParam("tipo") String tipo, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,

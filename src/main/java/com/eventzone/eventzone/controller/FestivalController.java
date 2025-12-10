@@ -32,30 +32,6 @@ public class FestivalController {
 	@Autowired
 	private ImagenService imagenService;
 
-	private void actualizarTickets(Evento evento, List<Ticket> tickets) {
-		if (tickets == null)
-			return;
-
-		// Eliminar tickets que ya no están
-		evento.getTickets()
-				.removeIf(t -> tickets.stream().noneMatch(nt -> nt.getId() != null && nt.getId().equals(t.getId())));
-
-		for (Ticket t : tickets) {
-			if (t.getId() != null) {
-				// Actualizar ticket existente
-				evento.getTickets().stream().filter(existing -> existing.getId().equals(t.getId())).findFirst()
-						.ifPresent(existing -> {
-							existing.setTipo(t.getTipo());
-							existing.setPrecio(t.getPrecio());
-							existing.setCantidad(t.getCantidad());
-						});
-			} else {
-				// Nuevo ticket
-				evento.addTicket(t);
-			}
-		}
-	}
-
 	@PostMapping("/crear")
 	public ResponseEntity<?> createFestival(@RequestParam("tipo") String tipo, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
@@ -131,7 +107,7 @@ public class FestivalController {
 			@RequestParam("contactoEmail") String contactoEmail,
 			@RequestParam(value = "imagenFile", required = false) MultipartFile imagen,
 			@RequestParam(required = false) String cartelArtistas, @RequestParam(required = false) Integer diasDuracion,
-			@RequestParam(required = false) String FechaFinStr, @RequestParam(required = false) String recinto,
+			@RequestParam(required = false) String fechaFinStr, @RequestParam(required = false) String recinto,
 			@RequestParam(required = false) Integer capacidad, @RequestParam(required = false) String horaComienzoStr,
 			@RequestParam(required = false) String aperturaPuertasStr, @RequestParam(required = false) Boolean parking,
 			@RequestParam(required = false) List<String> ticketsNombre,
@@ -143,41 +119,41 @@ public class FestivalController {
 			if (festival == null)
 				return ResponseEntity.status(404).body("Evento no encontrado");
 
-			//ACTUALIZAR CAMPOS
+			// ACTUALIZAR CAMPOS
 			festival.setNombre(nombre);
 			festival.setDescripcion(descripcion);
 			festival.setCiudad(ciudad);
 			festival.setDireccion(direccion);
 			festival.setFecha(LocalDate.parse(fechaStr));
 			festival.setContactoEmail(contactoEmail);
-			
+
 			festival.setCartelArtistas(cartelArtistas);
 			festival.setFestivalDias(diasDuracion);
-			festival.setFechaFin(LocalDate.parse(FechaFinStr));
+			festival.setFechaFin(LocalDate.parse(fechaFinStr));
 			festival.setRecinto(recinto);
 			festival.setCapacidad(capacidad);
 			festival.setHora(LocalTime.parse(horaComienzoStr));
 			festival.setAperturaPuertas(LocalTime.parse(aperturaPuertasStr));
 			festival.setParking(parking);
 
-			//IMAGEN
-	        if (imagen != null && !imagen.isEmpty()) {
+			// IMAGEN
+			if (imagen != null && !imagen.isEmpty()) {
 
-	            String imagenAnterior = festival.getImagenUrl();  // URL antigua
+				String imagenAnterior = festival.getImagenUrl(); // URL antigua
 
-	            String nuevaImagenUrl = imagenService.guardarImagen(imagen); // URL nueva
+				String nuevaImagenUrl = imagenService.guardarImagen(imagen); // URL nueva
 
-	            if (imagenAnterior != null && !imagenAnterior.isEmpty()) {
-	                imagenService.eliminarImagen(imagenAnterior); // borrar anterior
-	            }
+				if (imagenAnterior != null && !imagenAnterior.isEmpty()) {
+					imagenService.eliminarImagen(imagenAnterior); // borrar anterior
+				}
 
-	            festival.setImagenUrl(nuevaImagenUrl);
-	        }
-		
-			//TICKETS
+				festival.setImagenUrl(nuevaImagenUrl);
+			}
+
+			// TICKETS
 			festival.getTickets().clear();
-			if(ticketsNombre != null) {
-				for(int i = 0; i<ticketsNombre.size(); i++) {
+			if (ticketsNombre != null) {
+				for (int i = 0; i < ticketsNombre.size(); i++) {
 					Ticket t = new Ticket();
 					t.setTipo(ticketsNombre.get(i));
 					t.setPrecio(Double.parseDouble(ticketsPrecio.get(i)));
@@ -190,6 +166,7 @@ public class FestivalController {
 			EventoFestival actualizado = eventoService.saveFestival(festival);
 			return ResponseEntity.ok(actualizado);
 		} catch (Exception e) {
+			logger.error("Error al editar el evento: ", e);
 			return ResponseEntity.status(500).body("Error al editar el evento");
 		}
 	}

@@ -32,30 +32,6 @@ public class ConciertoController {
 	@Autowired
 	private ImagenService imagenService;
 
-	private void actualizarTickets(Evento evento, List<Ticket> tickets) {
-		if (tickets == null)
-			return;
-
-		// Eliminar tickets que ya no están
-		evento.getTickets()
-				.removeIf(t -> tickets.stream().noneMatch(nt -> nt.getId() != null && nt.getId().equals(t.getId())));
-
-		for (Ticket t : tickets) {
-			if (t.getId() != null) {
-				// Actualizar ticket existente
-				evento.getTickets().stream().filter(existing -> existing.getId().equals(t.getId())).findFirst()
-						.ifPresent(existing -> {
-							existing.setTipo(t.getTipo());
-							existing.setPrecio(t.getPrecio());
-							existing.setCantidad(t.getCantidad());
-						});
-			} else {
-				// Nuevo ticket
-				evento.addTicket(t);
-			}
-		}
-	}
-
 	@PostMapping("/crear")
 	public ResponseEntity<?> createConcierto(@RequestParam("tipo") String tipo, @RequestParam("nombre") String nombre,
 			@RequestParam("descripcion") String descripcion, @RequestParam("ciudad") String ciudad,
@@ -147,7 +123,7 @@ public class ConciertoController {
 			concierto.setDireccion(direccion);
 			concierto.setFecha(LocalDate.parse(fechaStr));
 			concierto.setContactoEmail(contactoEmail);
-			
+
 			concierto.setArtista(artista);
 			concierto.setArtistasApertura(artistasApertura);
 			concierto.setRecinto(recinto);
@@ -156,24 +132,24 @@ public class ConciertoController {
 			concierto.setAperturaPuertas(LocalTime.parse(aperturaPuertasStr));
 			concierto.setParking(parking);
 
-			//IMAGEN
-	        if (imagen != null && !imagen.isEmpty()) {
+			// IMAGEN
+			if (imagen != null && !imagen.isEmpty()) {
 
-	            String imagenAnterior = concierto.getImagenUrl();  // URL antigua
+				String imagenAnterior = concierto.getImagenUrl(); // URL antigua
 
-	            String nuevaImagenUrl = imagenService.guardarImagen(imagen); // URL nueva
+				String nuevaImagenUrl = imagenService.guardarImagen(imagen); // URL nueva
 
-	            if (imagenAnterior != null && !imagenAnterior.isEmpty()) {
-	                imagenService.eliminarImagen(imagenAnterior); // borrar anterior
-	            }
+				if (imagenAnterior != null && !imagenAnterior.isEmpty()) {
+					imagenService.eliminarImagen(imagenAnterior); // borrar anterior
+				}
 
-	            concierto.setImagenUrl(nuevaImagenUrl);
-	        }
+				concierto.setImagenUrl(nuevaImagenUrl);
+			}
 
-			//TICKETS
+			// TICKETS
 			concierto.getTickets().clear();
-			if(ticketsNombre !=null) {
-				for(int i = 0; i <ticketsNombre.size(); i++) {
+			if (ticketsNombre != null) {
+				for (int i = 0; i < ticketsNombre.size(); i++) {
 					Ticket t = new Ticket();
 					t.setTipo(ticketsNombre.get(i));
 					t.setPrecio(Double.parseDouble(ticketsPrecio.get(i)));
@@ -182,7 +158,7 @@ public class ConciertoController {
 					concierto.addTicket(t);
 				}
 			}
-			
+
 			EventoConcierto actualizado = eventoService.saveConcierto(concierto);
 			return ResponseEntity.ok(actualizado);
 
