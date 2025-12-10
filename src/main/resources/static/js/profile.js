@@ -31,7 +31,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	editarPerfil();
 	guardarCambios();
 	cancelarEdit();
-	favoritos();
 	logout();
 });
 
@@ -192,6 +191,102 @@ async function cargarEventosDisponibles() {
 	}
 }
 
+/* =========================================================
+   CARGAR ENTRADAS DEL USUARIO
+   ========================================================= */
+window.addEventListener('DOMContentLoaded', () => {
+	cargarMisEntradas();
+});
+
+/**
+ * Obtiene las entradas compradas por el usuario autenticado.
+ * @async
+ * @function cargarMisEntradas
+ */
+async function cargarMisEntradas() {
+
+	const ticketsContainer = document.querySelector('#ticketsTab .tickets-list');
+
+	try {
+		const res = await fetch('/entradas/mias', {
+			method: 'GET',
+			credentials: 'include'
+		});
+
+		if (!res.ok) throw new Error('Error al obtener entradas');
+
+		const entradas = await res.json();
+
+		ticketsContainer.innerHTML = '';
+
+		if (entradas.length === 0) {
+			ticketsContainer.innerHTML = `
+                <p class="no-events">No tienes entradas compradas.</p>
+            `;
+			return;
+		}
+
+		entradas.forEach(ticket => {
+			const card = document.createElement('div');
+			card.classList.add('ticket-card');
+
+			const estadoBadge =
+				ticket.estado === 'Confirmado'
+					? '<span class="badge badge-success">Confirmado</span>'
+					: '<span class="badge badge-pending">Pendiente</span>';
+
+			function formatFecha(fechaStr) {
+				const fecha = new Date(fechaStr);
+				return fecha.toLocaleDateString('es-ES', {
+					day: '2-digit',
+					month: 'short',
+					year: 'numeric'
+				});
+			}
+
+			card.innerHTML = `
+                <img src="${ticket.imagenUrl}" 
+                     alt="${ticket.eventoNombre}" 
+                     class="ticket-image">
+
+                <div class="ticket-info">
+                    <div class="ticket-header">
+                        <h3>${ticket.eventoNombre}</h3>
+                        ${estadoBadge}
+                    </div>
+
+                    <div class="ticket-details">
+                        <p class="detail-item">
+                            <span class="detail-icon">📅</span>
+                            ${formatFecha(ticket.fecha)}
+                        </p>
+                        <p class="detail-item">
+                            <span class="detail-icon">📍</span>
+                            ${ticket.ciudad}, ${ticket.lugar}
+                        </p>
+                        <p class="detail-item price">
+                            <span class="detail-icon">💳</span>
+                            €${ticket.precio}
+                        </p>
+                    </div>
+
+                    <div class="ticket-actions">
+                        <a href="/entradas/${ticket.id}" class="btn-primary">Ver entrada</a>
+                        <a href="/entradas/${ticket.id}/descargar" class="btn-secondary">Descargar</a>
+                    </div>
+                </div>
+            `;
+
+			ticketsContainer.appendChild(card);
+		});
+
+	} catch (error) {
+		console.error('Error cargando entradas:', error);
+		ticketsContainer.innerHTML = `<p class="no-events">No se pudieron cargar las entradas.</p>`;
+	}
+}
+
+
 
 /* =========================================================
    NAVEGACIÓN ENTRE PESTAÑAS
@@ -334,46 +429,6 @@ function cancelarEdit() {
 }
 
 /* =========================================================
-   FAVORITOS
-   ========================================================= */
-/**
- * Permite eliminar eventos de la lista de favoritos con confirmación.
- * @function favoritos
- */
-function favoritos() {
-	document.querySelectorAll('.btn-remove').forEach(btn => {
-		btn.addEventListener('click', function() {
-			Swal.fire({
-				title: '¿Desea eliminar este evento de favoritos?',
-				icon: 'warning',
-				showCancelButton: true,
-				confirmButtonText: 'Sí, eliminar',
-				cancelButtonText: 'Cancelar'
-			}).then((result) => {
-				if (result.isConfirmed) {
-					const card = this.closest('.favorite-card');
-					card.style.opacity = '0';
-					card.style.transform = 'scale(0.9)';
-					card.style.transition = 'all 0.3s';
-					setTimeout(() => {
-						card.remove();
-						const favCount = document.getElementById('favoritesCount');
-						favCount.textContent = parseInt(favCount.textContent) - 1;
-					}, 300);
-
-					Swal.fire({
-						icon: 'success',
-						title: 'Evento eliminado',
-						showConfirmButton: false,
-						timer: 1500
-					});
-				}
-			});
-		});
-	});
-}
-
-/* =========================================================
    CERRAR SESIÓN
    ========================================================= */
 /**
@@ -400,11 +455,11 @@ function logout() {
    ANIMACIONES DE ENTRADA
    ========================================================= */
 /**
- * Añade una animación de entrada para las tarjetas de entradas y favoritos.
+ * Añade una animación de entrada para las tarjetas de entrada.
  * @function animaciones
  */
 window.addEventListener('load', () => {
-	const cards = document.querySelectorAll('.ticket-card, .favorite-card');
+	const cards = document.querySelectorAll('.ticket-card');
 	cards.forEach((card, index) => {
 		card.style.opacity = '0';
 		card.style.transform = 'translateY(20px)';

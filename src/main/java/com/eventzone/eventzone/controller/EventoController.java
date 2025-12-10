@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.eventzone.eventzone.model.Evento;
-import com.eventzone.eventzone.model.EventoCine;
 import com.eventzone.eventzone.service.EventoService;
 import com.eventzone.eventzone.service.ImagenService;
 

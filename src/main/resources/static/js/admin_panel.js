@@ -454,25 +454,25 @@ async function editarEvento(eventoId) {
 		formData.append("idioma", document.getElementById("movieLanguage").value);
 		formData.append("sala", document.getElementById("movieSala").value);
 		formData.append("asientos", document.getElementById("movieAsientos").value);
-		formData.append("horarioSesion", document.getElementById("movieHorario").value);
+		formData.append("horarioSesionStr", document.getElementById("movieHorario").value);
 	}
 	if (tipo === "concierto") {
 		formData.append("artista", document.getElementById("artistName").value);
 		formData.append("artistasApertura", document.getElementById("supportActs").value);
 		formData.append("recinto", document.getElementById("venueConcierto").value);
 		formData.append("capacidad", document.getElementById("capacityConcierto").value);
-		formData.append("horaComienzo", document.getElementById("horaConcierto").value);
-		formData.append("aperturaPuertas", document.getElementById("puertasConcierto").value);
+		formData.append("horaComienzoStr", document.getElementById("horaConcierto").value);
+		formData.append("aperturaPuertasStr", document.getElementById("puertasConcierto").value);
 		formData.append("parking", document.getElementById("parkingConcierto").checked);
 	}
 	if (tipo === "festival") {
 		formData.append("cartelArtistas", document.getElementById("festivalLineup").value);
 		formData.append("diasDuracion", document.getElementById("festivalDays").value);
-		formData.append("fechaFin", document.getElementById("festivalEndDate").value);
+		formData.append("fechaFinStr", document.getElementById("festivalEndDate").value);
 		formData.append("recinto", document.getElementById("venueFestival").value);
 		formData.append("capacidad", document.getElementById("capacityFestival").value);
-		formData.append("horaComienzo", document.getElementById("horaFestival").value);
-		formData.append("aperturaPuertas", document.getElementById("puertasFestival").value);
+		formData.append("horaComienzoStr", document.getElementById("horaFestival").value);
+		formData.append("aperturaPuertasStr", document.getElementById("puertasFestival").value);
 		formData.append("parking", document.getElementById("parkingFestival").checked);
 	}
 
