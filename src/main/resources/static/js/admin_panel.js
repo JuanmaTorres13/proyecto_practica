@@ -4,22 +4,24 @@ document.addEventListener("DOMContentLoaded", () => {
 	cargarUsuarios();
 	cargarEventos();
 	llamarEvento();
+	const btnAdd = document.getElementById("addTicketBtn");
+	if (btnAdd) btnAdd.addEventListener("click", agregarTicket);
 });
 
-let archivoImagen = null; // variable global para guardar el archivo seleccionado
+let archivoImagen1 = null; // variable global para guardar el archivo seleccionado
 
 const imagenInput = document.getElementById("imagenFile");
 if (imagenInput) {
     imagenInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
-        archivoImagen = file || null;
+        archivoImagen1 = file || null;
 
         const imagePreview = document.getElementById("imagePreview");
         if (imagePreview) {
             if (file) {
                 imagePreview.src = URL.createObjectURL(file); // previsualiza la nueva imagen
             } else {
-                imagePreview.src = document.getElementById("eventForm").dataset.imagenUrl || '/images/default-event.jpg';
+                imagePreview.src = document.getElementById("eventForm").dataset.imagenUrl || '/images/default-image.jpg';
             }
         }
     });
@@ -441,8 +443,8 @@ async function editarEvento(eventoId) {
 	formData.append("fecha", document.getElementById("eventDate").value);
 	formData.append("contactoEmail", document.getElementById("eventContact").value);
 
-	if (archivoImagen) {
-		formData.append("imagenFile", archivoImagen);
+	if (archivoImagen1) {
+		formData.append("imagenFile", archivoImagen1);
 	} else if (form.dataset.imagenUrl) {
 		formData.append("imagenUrl", form.dataset.imagenUrl);
 	}
