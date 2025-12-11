@@ -9,15 +9,13 @@ const addTicketBtn = document.getElementById("addTicketBtn");
 const ticketTypesContainer = document.getElementById("ticketTypes");
 
 // Imagen
-const imagenInput = document.getElementById("imagenFile");
-let archivoImagen = null;
+const imagenInput1 = document.getElementById("imagenFile");
+var archivoImagen = null;
 
 document.addEventListener("DOMContentLoaded", function() {
 
-
-
-	if (imagenInput) {
-		imagenInput.addEventListener("change", function() {
+	if (imagenInput1) {
+		imagenInput1.addEventListener("change", function() {
 			archivoImagen = this.files[0];
 			if (archivoImagen) {
 				const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/gif"];
@@ -35,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	// Mostrar/ocultar campos según tipo de evento
 	eventTypeRadios.forEach(radio => {
 		radio.addEventListener("change", function() {
+			console.log("Click en radio:", this.value);
 			const tipo = this.value;
 			cineFields.forEach(f => f.style.display = "none");
 			conciertoFields.forEach(f => f.style.display = "none");
@@ -48,21 +47,44 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// Tickets dinámicos
 	if (addTicketBtn && ticketTypesContainer) {
-		addTicketBtn.addEventListener("click", function() {
-			const firstTicket = ticketTypesContainer.firstElementChild;
-			if (!firstTicket) return;
-			const newTicket = firstTicket.cloneNode(true);
-			newTicket.querySelectorAll("input").forEach(input => input.value = "");
-			const removeBtn = newTicket.querySelector(".btn-remove-ticket");
-			if (removeBtn) {
-				removeBtn.style.display = "inline-block";
-				removeBtn.addEventListener("click", function() {
-					newTicket.remove();
-				});
-			}
-			ticketTypesContainer.appendChild(newTicket);
-		});
+	    addTicketBtn.addEventListener("click", function() {
+	        
+	        const newTicket = document.createElement("div");
+	        newTicket.classList.add("ticket-type-item");
+	        newTicket.innerHTML = `
+	            <div class="form-grid">
+	                <div class="form-group">
+	                    <label>Tipo de Entrada *</label>
+	                    <input type="text" name="ticketTypeName[]" required>
+	                </div>
+	                <div class="form-group">
+	                    <label>Precio (€) *</label>
+	                    <input type="number" name="ticketTypePrice[]" step="0.01" min="0" required>
+	                </div>
+	                <div class="form-group">
+	                    <label>Cantidad Disponible *</label>
+	                    <input type="number" name="ticketTypeQuantity[]" min="1" required>
+	                </div>
+	            </div>
+
+	            <button type="button" class="btn-remove-ticket">🗑️ Eliminar</button>
+	        `;
+
+	        const removeBtn = newTicket.querySelector(".btn-remove-ticket");
+	        removeBtn.addEventListener("click", () => newTicket.remove());
+
+	        ticketTypesContainer.appendChild(newTicket);
+
+	        // Activar botón eliminar del primer ticket si hay más de uno
+	        const allTickets = ticketTypesContainer.querySelectorAll(".ticket-type-item");
+	        if (allTickets.length > 1) {
+	            const firstRemoveBtn = allTickets[0].querySelector(".btn-remove-ticket");
+	            if (firstRemoveBtn) firstRemoveBtn.style.display = "inline-block";
+	        }
+	    });
 	}
+
+
 
 	// Enviar formulario
 

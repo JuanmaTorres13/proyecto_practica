@@ -306,6 +306,10 @@ function navTab() {
 
 			const selectedTab = document.getElementById(tabName + 'Tab');
 			if (selectedTab) selectedTab.classList.add('active');
+			
+			if(tabName==='tickets'){
+				cargarMisEntradas();
+			}
 		});
 	});
 }
