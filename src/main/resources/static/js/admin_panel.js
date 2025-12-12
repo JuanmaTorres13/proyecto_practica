@@ -4,6 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
 	cargarUsuarios();
 	cargarEventos();
 	llamarEvento();
+	
+	document.querySelectorAll('input[name="eventType"]').forEach(radio => {
+	    radio.addEventListener("change", () => {
+	        mostrarCamposPorTipo(radio.value.toLowerCase());
+	    });
+	});
+
 	const btnAdd = document.getElementById("addTicketBtn");
 	if (btnAdd) btnAdd.addEventListener("click", agregarTicket);
 });
@@ -505,15 +512,44 @@ async function editarEvento(eventoId) {
 			showConfirmButton: false
 		});
 
-		form.reset();
-		delete form.dataset.eventoid;
+		// Limpiar formulario
+		limpiarFormularioEvento();
+
+		// Recargar lista
 		cargarEventos();
+
+		// Volver a pestaña de eventos
 		document.querySelector('.menu-item[data-tab="tab-lista-eventos"]').click();
 
 	} catch (err) {
 		console.error(err);
 		Swal.fire("Error", err.message, "error");
 	}
+}
+
+function limpiarFormularioEvento() {
+    const form = document.getElementById("eventForm");
+
+    // Reset nativo del formulario
+    form.reset();
+
+    // Eliminar ID de edición
+    delete form.dataset.eventoid;
+
+    // Vaciar tickets dinámicos
+    const ticketContainer = document.getElementById("ticketTypes");
+    if (ticketContainer) ticketContainer.innerHTML = "";
+
+    // Limpiar previsualización y archivo temporal
+    archivoImagen1 = null;
+    const imagePreview = document.getElementById("imagePreview");
+    if (imagePreview) imagePreview.src = "/images/default-image.jpg";
+
+    // Reset campos por tipo (oculta todos)
+    mostrarCamposPorTipo("");
+
+    // Deseleccionar tipo de evento
+    document.querySelectorAll('input[name="eventType"]').forEach(r => r.checked = false);
 }
 
 
