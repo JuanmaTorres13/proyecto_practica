@@ -46,7 +46,7 @@ public class JwtService {
      */
     @PostConstruct
     public void init() {
-        System.out.println("JWT Secret cargada: " + secretKey);
+        System.out.println("JWT Secret cargada correctamente");
     }
 
     /**
