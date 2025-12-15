@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del Evento</title>
+    <link rel="stylesheet" th:href="@{/css/evento_detalle.css}">
+</head>
+<body>
+
+<div class="container">
+
+    <a href="/mis-entradas" class="back-btn">← Volver</a>
+
+    <h1 th:text="${evento.nombre}"></h1>
+
+    <span class="badge" th:text="${evento.tipo}"></span>
+
+    <p th:text="${evento.descripcion}"></p>
+
+    <ul>
+        <li><strong>Fecha:</strong> <span th:text="${evento.fecha}"></span></li>
+        <li><strong>Ciudad:</strong> <span th:text="${evento.ciudad}"></span></li>
+        <li><strong>Dirección:</strong> <span th:text="${evento.direccion}"></span></li>
+        <li><strong>Email contacto:</strong> <span th:text="${evento.contactoEmail}"></span></li>
+    </ul>
+
+    <!-- SOLO PARA CINE -->
+    <div th:if="${evento.tipo == 'cine'}">
+        <h3>🎬 Detalles Cine</h3>
+        <p><strong>Director:</strong> <span th:text="${evento.director}"></span></p>
+        <p><strong>Sala:</strong> <span th:text="${evento.sala}"></span></p>
+        <p><strong>Hora:</strong> <span th:text="${evento.horarioSesion}"></span></p>
+    </div>
+
+    <!-- SOLO PARA CONCIERTO -->
+    <div th:if="${evento.tipo == 'concierto'}">
+        <h3>🎤 Detalles Concierto</h3>
+        <p><strong>Artista:</strong> <span th:text="${evento.artista}"></span></p>
+        <p><strong>Recinto:</strong> <span th:text="${evento.recinto}"></span></p>
+        <p><strong>Hora:</strong> <span th:text="${evento.horaComienzo}"></span></p>
+    </div>
+
+    <!-- SOLO PARA FESTIVAL -->
+    <div th:if="${evento.tipo == 'festival'}">
+        <h3>🎪 Detalles Festival</h3>
+        <p><strong>Cartel:</strong> <span th:text="${evento.cartelArtistas}"></span></p>
+        <p><strong>Días:</strong> <span th:text="${evento.diasDuracion}"></span></p>
+    </div>
+
+</div>
+
+</body>
+</html>
