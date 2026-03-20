@@ -76,6 +76,7 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/favicon.ico"
                         ).permitAll()
+                        .requestMatchers("/compras/**").authenticated()
                         .requestMatchers("/usuarios/profile").authenticated()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/user/**").hasAuthority("USER")

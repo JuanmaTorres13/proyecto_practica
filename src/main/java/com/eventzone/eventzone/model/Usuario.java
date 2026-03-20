@@ -1,6 +1,7 @@
 package com.eventzone.eventzone.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.ToString;
 
 import java.util.Date;
@@ -36,6 +37,9 @@ public class Usuario {
 
 	@Column(name = "fecha_nacimiento")
 	private LocalDate fechaNacimiento;
+
+	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Compra> compras;
 
 	// Getters y Setters
 	public Long getId() {

@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:C:\\Users\\wul4p\\Desktop\\proyecto_practicas\\eventzone\\uploads")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/")
                 .setCachePeriod(0); // <--- desactiva caché
     }
 }

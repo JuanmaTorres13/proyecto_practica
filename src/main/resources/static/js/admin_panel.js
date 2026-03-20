@@ -197,6 +197,15 @@ async function cargarEventos() {
                         <p>Fecha: ${e.fechaFin && e.fechaFin !== e.fecha ? `${formatFecha(e.fecha)} - ${formatFecha(e.fechaFin)}` : formatFecha(e.fecha)}</p>
                         <p>📍 ${e.ciudad || ''}${e.direccion ? ", " + e.direccion : ''}</p>
                     </div>
+                    <div class="ticket-prices">
+        ${
+				e.tickets && e.tickets.length > 0
+					? e.tickets.map(t => `
+                <p>🎟️ ${t.tipo}: ${t.precio}€</p>
+              `).join('')
+					: '<p>Sin entradas</p>'
+			}
+    </div>
                     <div class="ticket-actions">
                         <button class="btn-delete-user btn-edit">✏️ Editar</button>
                         <button class="btn-delete-user btn-delete">🗑️ Eliminar</button>
