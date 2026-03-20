@@ -3,48 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <title>Detalle del Evento</title>
-    <link rel="stylesheet" th:href="@{/css/evento_detalle.css}">
+    <link rel="stylesheet" th:href="@{/css/detalle_evento.css}">
 </head>
 <body>
 
 <div class="container">
 
-    <a href="/mis-entradas" class="back-btn">← Volver</a>
+    <a href="javascript:history.back()" class="back-btn">← Volver a Usuario</a>
 
-    <h1 th:text="${evento.nombre}"></h1>
+    <div class="event-card" th:classappend="' event-' + ${evento.tipo}">
 
-    <span class="badge" th:text="${evento.tipo}"></span>
+        <div class="event-header">
+            <h1 th:text="${evento.nombre}"></h1>
+            <span class="event-badge" th:text="${evento.tipo}"></span>
+        </div>
 
-    <p th:text="${evento.descripcion}"></p>
+        <div class="event-body">
 
-    <ul>
-        <li><strong>Fecha:</strong> <span th:text="${evento.fecha}"></span></li>
-        <li><strong>Ciudad:</strong> <span th:text="${evento.ciudad}"></span></li>
-        <li><strong>Dirección:</strong> <span th:text="${evento.direccion}"></span></li>
-        <li><strong>Email contacto:</strong> <span th:text="${evento.contactoEmail}"></span></li>
-    </ul>
+            <div class="event-info">
+                <div class="info-row">
+                    <span class="info-label">Descripción:</span>
+                    <span class="info-value" th:text="${evento.descripcion}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fecha:</span>
+                    <span class="info-value" th:text="${evento.fecha}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ciudad:</span>
+                    <span class="info-value" th:text="${evento.ciudad}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Dirección:</span>
+                    <span class="info-value" th:text="${evento.direccion}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email contacto:</span>
+                    <span class="info-value" th:text="${evento.contactoEmail}"></span>
+                </div>
+            </div>
 
-    <!-- SOLO PARA CINE -->
-    <div th:if="${evento.tipo == 'cine'}">
-        <h3>🎬 Detalles Cine</h3>
-        <p><strong>Director:</strong> <span th:text="${evento.director}"></span></p>
-        <p><strong>Sala:</strong> <span th:text="${evento.sala}"></span></p>
-        <p><strong>Hora:</strong> <span th:text="${evento.horarioSesion}"></span></p>
-    </div>
+            <!-- TICKETS -->
+            <div class="event-subcard" th:if="${evento.tickets != null and !evento.tickets.isEmpty()}">
+                <h3>🎫 Tickets disponibles</h3>
 
-    <!-- SOLO PARA CONCIERTO -->
-    <div th:if="${evento.tipo == 'concierto'}">
-        <h3>🎤 Detalles Concierto</h3>
-        <p><strong>Artista:</strong> <span th:text="${evento.artista}"></span></p>
-        <p><strong>Recinto:</strong> <span th:text="${evento.recinto}"></span></p>
-        <p><strong>Hora:</strong> <span th:text="${evento.horaComienzo}"></span></p>
-    </div>
+                <div th:each="ticket : ${evento.tickets}">
+                    <div class="info-row">
+                        <span class="info-label">Tipo de entrada:</span>
+                        <span class="info-value" th:text="${ticket.tipo}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Precio:</span>
+                        <span class="info-value" th:text="${ticket.precio} + ' €'"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Disponibles:</span>
+                        <span class="info-value" th:text="${ticket.disponibles}"></span>
+                    </div>
+                </div>
+            </div>
 
-    <!-- SOLO PARA FESTIVAL -->
-    <div th:if="${evento.tipo == 'festival'}">
-        <h3>🎪 Detalles Festival</h3>
-        <p><strong>Cartel:</strong> <span th:text="${evento.cartelArtistas}"></span></p>
-        <p><strong>Días:</strong> <span th:text="${evento.diasDuracion}"></span></p>
+            <!-- DETALLES ESPECÍFICOS POR TIPO -->
+            <!-- CINE -->
+            <div class="event-subcard" th:if="${evento.tipo == 'cine'}">
+                <h3>🎬 Detalles Cine</h3>
+                <div class="info-row">
+                    <span class="info-label">Director:</span>
+                    <span class="info-value" th:text="${evento.director}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Sala:</span>
+                    <span class="info-value" th:text="${evento.sala}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Hora:</span>
+                    <span class="info-value" th:text="${evento.horarioSesion}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Asientos:</span>
+                    <span class="info-value" th:text="${evento.asientos}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Idioma:</span>
+                    <span class="info-value" th:text="${evento.idioma}"></span>
+                </div>
+            </div>
+
+            <!-- CONCIERTO -->
+            <div class="event-subcard" th:if="${evento.tipo == 'concierto'}">
+                <h3>🎤 Detalles Concierto</h3>
+                <div class="info-row">
+                    <span class="info-label">Artista:</span>
+                    <span class="info-value" th:text="${evento.artista}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Recinto:</span>
+                    <span class="info-value" th:text="${evento.recinto}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Hora:</span>
+                    <span class="info-value" th:text="${evento.horaComienzo}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Apertura puertas:</span>
+                    <span class="info-value" th:text="${evento.aperturaPuertas}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Capacidad:</span>
+                    <span class="info-value" th:text="${evento.capacidad}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Parking:</span>
+                    <span class="info-value" th:text="${evento.parking}"></span>
+                </div>
+            </div>
+
+            <!-- FESTIVAL -->
+            <div class="event-subcard" th:if="${evento.tipo == 'festival'}">
+                <h3>🎪 Detalles Festival</h3>
+                <div class="info-row">
+                    <span class="info-label">Cartel:</span>
+                    <span class="info-value" th:text="${evento.cartelArtistas}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Días:</span>
+                    <span class="info-value" th:text="${evento.diasDuracion}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Recinto:</span>
+                    <span class="info-value" th:text="${evento.recinto}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Hora inicio:</span>
+                    <span class="info-value" th:text="${evento.horaComienzo}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Capacidad:</span>
+                    <span class="info-value" th:text="${evento.capacidad}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Parking:</span>
+                    <span class="info-value" th:text="${evento.parking}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Apertura puertas:</span>
+                    <span class="info-value" th:text="${evento.aperturaPuertas}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fecha fin:</span>
+                    <span class="info-value" th:text="${evento.fechaFin}"></span>
+                </div>
+            </div>
+
+        </div>
     </div>
 
 </div>

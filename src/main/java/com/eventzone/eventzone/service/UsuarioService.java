@@ -84,6 +84,11 @@ public class UsuarioService {
 		return usuarioRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 	}
 
+	public Usuario buscarPorId(Long id) {
+		Optional<Usuario> usuario = usuarioRepository.findById(id);
+		return usuario.orElse(null);
+	}
+
 	/**
 	 * Verifica si existe un usuario registrado con un correo electrónico dado.
 	 *

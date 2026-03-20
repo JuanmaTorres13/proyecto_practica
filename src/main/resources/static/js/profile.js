@@ -27,11 +27,14 @@ let originalData = {};
 
 /* ====== INICIALIZACIÓN ====== */
 window.addEventListener('DOMContentLoaded', () => {
-	navTab();
-	editarPerfil();
-	guardarCambios();
-	cancelarEdit();
-	logout();
+	navTab();            // navegación entre pestañas
+	editarPerfil();      // habilitar edición
+	guardarCambios();    // guardar cambios
+	cancelarEdit();      // cancelar edición
+	logout();            // cerrar sesión
+	cargarPerfil();      // cargar datos del usuario
+	cargarEventosDisponibles(); // cargar lista de eventos
+	cargarMisEntradas(); // cargar las entradas compradas
 });
 
 cargarPerfil();
@@ -162,8 +165,8 @@ async function cargarEventosDisponibles() {
                     </div>
 
                     <div class="ticket-actions">
-                        <a href="/eventos/${evento.id}" class="btn-primary">Ver detalles</a>
-                        <a href="/eventos/comprar/${evento.id}" class="btn-secondary">Comprar</a>
+                        <a href="/eventos/detalle/${evento.id}" class="btn-primary">Ver detalles</a>
+                        <button class="btn-secondary buy-btn" data-evento-id="${evento.id}">Comprar</button>
                     </div>
                 </div>
             `;
@@ -194,90 +197,90 @@ async function cargarEventosDisponibles() {
 /* =========================================================
    CARGAR ENTRADAS DEL USUARIO
    ========================================================= */
-window.addEventListener('DOMContentLoaded', () => {
-	cargarMisEntradas();
-});
-
-/**
- * Obtiene las entradas compradas por el usuario autenticado.
- * @async
- * @function cargarMisEntradas
- */
 async function cargarMisEntradas() {
-
 	const ticketsContainer = document.querySelector('#ticketsTab .tickets-list');
 
 	try {
-		const res = await fetch('/entradas/mias', {
+		const res = await fetch('/compras/mis-compras', {
 			method: 'GET',
 			credentials: 'include'
 		});
 
 		if (!res.ok) throw new Error('Error al obtener entradas');
 
-		const entradas = await res.json();
+		const compras = await res.json();
+		console.log('Compras del usuario:', compras); // Depuración
+
+		// Actualizar el contador de entradas en la barra lateral
+		const ticketsCountElement = document.getElementById('ticketsCount');
+		if (ticketsCountElement) {
+			ticketsCountElement.textContent = compras.length;
+		}
 
 		ticketsContainer.innerHTML = '';
 
-		if (entradas.length === 0) {
-			ticketsContainer.innerHTML = `
-                <p class="no-events">No tienes entradas compradas.</p>
-            `;
+		if (!compras || compras.length === 0) {
+			ticketsContainer.innerHTML = `<p class="no-events">No tienes entradas compradas.</p>`;
 			return;
 		}
 
-		entradas.forEach(ticket => {
+		compras.forEach(compra => {
 			const card = document.createElement('div');
 			card.classList.add('ticket-card');
 
-			const estadoBadge =
-				ticket.estado === 'Confirmado'
-					? '<span class="badge badge-success">Confirmado</span>'
-					: '<span class="badge badge-pending">Pendiente</span>';
-
-			function formatFecha(fechaStr) {
-				const fecha = new Date(fechaStr);
-				return fecha.toLocaleDateString('es-ES', {
-					day: '2-digit',
-					month: 'short',
-					year: 'numeric'
-				});
-			}
-
+			// Tarjeta de entrada con botón de descarga QR
 			card.innerHTML = `
-                <img src="${ticket.imagenUrl}" 
-                     alt="${ticket.eventoNombre}" 
-                     class="ticket-image">
+                <img src="${compra.eventoImagenUrl}" alt="${compra.eventoNombre}" class="ticket-image">
 
                 <div class="ticket-info">
                     <div class="ticket-header">
-                        <h3>${ticket.eventoNombre}</h3>
-                        ${estadoBadge}
+                        <h3>${compra.eventoNombre}</h3>
+                        <span class="badge badge-success">Comprado</span>
                     </div>
 
                     <div class="ticket-details">
-                        <p class="detail-item">
-                            <span class="detail-icon">📅</span>
-                            ${formatFecha(ticket.fecha)}
-                        </p>
-                        <p class="detail-item">
-                            <span class="detail-icon">📍</span>
-                            ${ticket.ciudad}, ${ticket.lugar}
-                        </p>
-                        <p class="detail-item price">
-                            <span class="detail-icon">💳</span>
-                            €${ticket.precio}
-                        </p>
+                        <p class="detail-item">📅 ${new Date(compra.fechaCompra).toLocaleDateString('es-ES')}</p>
+                        <p class="detail-item">📍 ${compra.eventoCiudad}, ${compra.eventoDireccion}</p>
+                        <p class="detail-item price">💳 €${compra.ticketPrecio}</p>
                     </div>
 
                     <div class="ticket-actions">
-                        <a href="/entradas/${ticket.id}" class="btn-primary">Ver entrada</a>
-                        <a href="/entradas/${ticket.id}/descargar" class="btn-secondary">Descargar</a>
+                        <button class="btn-secondary download-qr-btn">Descargar QR</button>
                     </div>
                 </div>
             `;
 
 			ticketsContainer.appendChild(card);
+
+			// Listener para generar QR
+			const downloadBtn = card.querySelector('.download-qr-btn');
+			downloadBtn.addEventListener('click', async () => {
+				try {
+					const eventoNombre = compra.eventoNombre || 'Desconocido';
+					const compraId = compra.compraId || 'Desconocido';
+					const fechaCompra = compra.fechaCompra
+						? new Date(compra.fechaCompra).toLocaleDateString('es-ES')
+						: 'Desconocida';
+
+					const qrData = `Evento: ${eventoNombre} | Compra ID: ${compraId} | Fecha: ${fechaCompra}`;
+
+					const canvas = document.createElement('canvas');
+					await QRCode.toCanvas(canvas, qrData, { width: 300 });
+
+					const link = document.createElement('a');
+					link.href = canvas.toDataURL('image/png');
+					link.download = `QR_Compra_${compraId}.png`;
+					link.click();
+
+				} catch (error) {
+					console.error('Error generando QR:', error);
+					Swal.fire({
+						icon: 'error',
+						title: 'Error',
+						text: 'No se pudo generar el QR.'
+					});
+				}
+			});
 		});
 
 	} catch (error) {
@@ -285,7 +288,6 @@ async function cargarMisEntradas() {
 		ticketsContainer.innerHTML = `<p class="no-events">No se pudieron cargar las entradas.</p>`;
 	}
 }
-
 
 
 /* =========================================================
@@ -475,3 +477,63 @@ window.addEventListener('load', () => {
 		}, 50 + (index * 100));
 	});
 });
+
+/* =========================================================
+   BOTÓN COMPRAR TICKET (solo 1 por compra)
+   ========================================================= */
+document.addEventListener('click', async (e) => {
+	if (e.target && e.target.classList.contains('buy-btn')) {
+		const ticketId = e.target.dataset.eventoId;
+
+		// Confirmación de compra
+		const { isConfirmed } = await Swal.fire({
+			title: '¿Desea comprar este ticket?',
+			icon: 'question',
+			showCancelButton: true,
+			confirmButtonText: 'Sí, comprar',
+			cancelButtonText: 'Cancelar'
+		});
+
+		if (!isConfirmed) return;
+
+		try {
+			const res = await fetch(`/compras/ticket/${ticketId}`, {
+				method: 'POST',
+				credentials: 'include', // si usas cookie JWT HTTP-only
+				headers: { 'Content-Type': 'application/json' }
+			});
+
+			const data = await res.json();
+
+			if (!res.ok) {
+				Swal.fire({
+					icon: 'error',
+					title: 'Error al comprar',
+					text: data.message || 'No se pudo completar la compra'
+				});
+				return;
+			}
+
+			Swal.fire({
+				icon: 'success',
+				title: 'Compra exitosa',
+				html: `Has comprado <strong>1</strong> ticket`,
+				timer: 2000,
+				showConfirmButton: false
+			});
+
+			// Actualizar listas
+			cargarEventosDisponibles();
+			cargarMisEntradas();
+
+		} catch (error) {
+			console.error(error);
+			Swal.fire({
+				icon: 'error',
+				title: 'Error',
+				text: 'No se pudo completar la compra'
+			});
+		}
+	}
+});
+
