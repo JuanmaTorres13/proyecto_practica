@@ -23,15 +23,15 @@ public class CompraController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @PostMapping("/ticket/{ticketId}")
-    public ResponseEntity<?> comprarTicket(@PathVariable Long ticketId) {
+    @PostMapping("/ticket/{eventoId}")
+    public ResponseEntity<?> comprarTicket(@PathVariable Long eventoId) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName(); // asumimos que el email está en principal
             Usuario usuario = usuarioRepository.findByEmail(email)
                     .orElseThrow(() -> new Exception("Usuario no encontrado"));
 
-            Compra compra = compraService.comprarTicket(usuario, ticketId);
+            Compra compra = compraService.comprarTicket(usuario, eventoId);
             return ResponseEntity.ok(compra);
 
         } catch (Exception e) {

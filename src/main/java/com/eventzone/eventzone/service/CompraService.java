@@ -26,9 +26,14 @@ public class CompraService {
     private UsuarioRepository usuarioRepository;
 
     @Transactional
-    public Compra comprarTicket(Usuario usuario, Long ticketId) throws Exception {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new Exception("Ticket no encontrado"));
+    public Compra comprarTicket(Usuario usuario, Long eventoId) throws Exception {
+        List<Ticket> tickets = ticketRepository.findByEventoId(eventoId);
+
+        if (tickets.size()<1){
+            throw new Exception("No hay tickets disponibles");
+        }
+
+        Ticket ticket = tickets.get(0);
 
         if (ticket.getDisponibles() <= 0) {
             throw new Exception("No hay tickets disponibles");

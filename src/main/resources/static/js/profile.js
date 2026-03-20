@@ -483,7 +483,7 @@ window.addEventListener('load', () => {
    ========================================================= */
 document.addEventListener('click', async (e) => {
 	if (e.target && e.target.classList.contains('buy-btn')) {
-		const ticketId = e.target.dataset.eventoId;
+		const evento_id = e.target.dataset.eventoId;
 
 		// Confirmación de compra
 		const { isConfirmed } = await Swal.fire({
@@ -497,7 +497,7 @@ document.addEventListener('click', async (e) => {
 		if (!isConfirmed) return;
 
 		try {
-			const res = await fetch(`/compras/ticket/${ticketId}`, {
+			const res = await fetch(`/compras/ticket/${evento_id}`, {
 				method: 'POST',
 				credentials: 'include', // si usas cookie JWT HTTP-only
 				headers: { 'Content-Type': 'application/json' }
